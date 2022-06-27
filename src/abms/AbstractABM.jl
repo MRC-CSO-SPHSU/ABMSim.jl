@@ -4,9 +4,9 @@ Specification of an abstract ABM type as a supertype for all
     from Agents.jl
 """
 
-using XAgents
+# using XAgents
 
-using Utilities: age2yearsmonths, removefirst!
+using MultiAgents.Util: removefirst!
 
 export AbstractABM 
 export allagents, nagents
@@ -34,7 +34,6 @@ function getproperty(model::AbstractABM,property::Symbol)
     error("$(property) is not available as a key")
 end 
 
-
 #========================================
 Functionalities for agents within an ABM
 =########################################
@@ -42,7 +41,6 @@ Functionalities for agents within an ABM
 "return the id-th agent (Agents.jl)"
 getindex(model::AbstractABM,id) = error("not implemented")
     
-
 # equivalent to operator [], i.e. model[id] 
 
 "random seed of the model (Agents.jl)"
@@ -81,7 +79,6 @@ end
 
 "to a given position (Agents.jl)" 
 move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
-
 
 "remove an agent"
 kill_agent!(agent,model::AbstractABM) = removefirst!(model.agentsList,agent) 

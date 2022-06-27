@@ -5,9 +5,9 @@
     for running an ABM simulation. (An imitation of Agents.jl) 
 """ 
 
-using Utilities: read2DArray
-export ABM, initial_connect!, attach2DData!
+using  MultiAgents.Util: read2DArray
 
+export ABM, initial_connect!, attach2DData!
 
 # dummydeclare(dict::Dict{Symbol}=Dict{Symbol}()) = nothing 
 

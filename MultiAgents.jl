@@ -1,5 +1,7 @@
 module MultiAgents
 
+    include("src/Util.jl")
+
     include("src/AbstractXAgent.jl")
 
     include("src/abms/AbstractABM.jl")
