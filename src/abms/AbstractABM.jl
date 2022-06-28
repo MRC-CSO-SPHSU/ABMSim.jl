@@ -4,8 +4,6 @@ Specification of an abstract ABM type as a supertype for all
     from Agents.jl
 """
 
-# using XAgents
-
 using MultiAgents.Util: removefirst!
 
 export AbstractABM 
