@@ -14,7 +14,25 @@ module Util
     export USEAGENTSJL
 
     # functions 
-    export removefirst!, date2yearsmonths
+    export removefirst!, date2yearsmonths, subtract!
+
+
+    """
+    A super type for example 
+
+    The purpose is to provide type traits for overloading 
+    functions that need to be overloaded, e.g. setup!(::AbstractSimulation,::ExampleType) 
+
+    Main usage 
+
+    struct ExampleName <: AbstractExample end
+
+    import Simulations: setup!
+
+    function setup!(sim::SimulationType;example::ExampleName) 
+        # implementation, e.g. setup stepping functions 
+    end 
+    """
 
     "A super type for all simulation examples"
     abstract type AbstractExample end 
@@ -33,6 +51,28 @@ module Util
         deleteat!(list, findfirst(x -> x == e, list)) 
         nothing 
     end
+
+    """
+    Subtract keys from a given dictionary
+    @argument dict : input dictionary 
+    @argument ks   : input keys
+    @throws  ArgumentError if a key in keys not available in dict  
+    @return a new dictionary with exactly the specified keys 
+    """ 
+    function  subtract!(ks::Vector{Symbol},dict::Dict) 
+        if  ks ⊈  keys(dict) 
+            throw(ArgumentError("$ks ⊈  $(keys(dict))")) 
+        end 
+        newdict = Dict{Symbol,Any}()  
+        for key ∈ ks 
+            newdict[key] = dict[key] 
+            delete!(dict,key) 
+        end 
+        newdict 
+    end 
+
+    "" 
+    Base.:(-)(ks::Vector{Symbol},dict::Dict) = subtract!(ks,dict) 
 
     "Read and return a 2D array from a file without a header"
     function read2DArray(fname::String)
