@@ -5,7 +5,6 @@ This file is included in Simuilations module
 """
 
 using Random
-using XAgents:     AbstractAgent 
 using MultiAgents.Util:   date2yearsmonths 
 
 import MultiAgents: step!
