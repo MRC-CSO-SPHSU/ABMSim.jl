@@ -4,7 +4,7 @@ Run this script from shell as
 
 or within REPL
 
-julia> push!(LOAD_PATH,"/path/to/MultiAgents.jl/src")
+julia> push!(LOAD_PATH,"/path/to/MultiAgents.jl")
 julia> include("RunTests.jl")
 """
 
