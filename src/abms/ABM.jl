@@ -5,7 +5,7 @@
     for running an ABM simulation. (An imitation of Agents.jl) 
 """ 
 
-using  MultiAgents.Util: read2DArray
+using  SomeUtil: read2DArray
 
 export ABM, initial_connect!, attach2DData!
 
