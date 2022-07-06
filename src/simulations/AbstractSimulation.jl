@@ -5,7 +5,7 @@ This file is included in Simuilations module
 """
 
 using Random
-using MultiAgents.Util:   date2yearsmonths 
+using SomeUtil:   date2yearsmonths 
 
 import MultiAgents: step!
 export step!, run!  
