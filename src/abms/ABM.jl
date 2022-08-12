@@ -22,10 +22,21 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     properties
     data::Dict{Symbol}       # data structure to be improved 
 
-    ABM{AgentType}(properties::Dict{Symbol} = Dict{Symbol,Any}(); 
-        declare::Function = dict::Dict{Symbol} -> AgentType[]) where AgentType <: AbstractAgent = 
-             new(declare(properties),copy(properties),Dict{Symbol,Any}())
-             
+    #= TODO
+    properties are from Agent
+    it is good to have parameters, variables etc. (that could be struct or dictionaries?) 
+    =#
+
+    ABM{AgentType}(properties = Dict{Symbol,Any}(); 
+        declare::Function = dict -> AgentType[]) where AgentType <: AbstractAgent = 
+             new(declare(properties),deepcopy(properties),Dict{Symbol,Any}())
+    
+    #=         
+    ABM{AgentType}(pars; 
+        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
+        new(declare(pars),copy(pars),Dict{Symbol,Any}())         
+    =# 
+    
     # ^^^ to add an argument for data with default value empty 
 
 end # AgentBasedModel  
@@ -39,4 +50,4 @@ end
 "ensure symmetry"
 initial_connect!(abm2::ABM{T2},
                  abm1::ABM{T1},
-                 properties::Dict{Symbol}) where {T1 <: AbstractABM,T2 <: AbstractABM} = initial_connect!(abm1,abm2,properties)
+                 pars) where {T1 <: AbstractABM,T2 <: AbstractABM} = initial_connect!(abm1,abm2,pars)
