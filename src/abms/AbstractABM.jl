@@ -26,12 +26,12 @@ function allagents(model::AbstractABM)#::Array{AgentType,1} where AgentType <: A
 end 
 
 "add a symbol property to a model"
-function getproperty(model::AbstractABM,property::Symbol)
-    if property in keys(model.properties)
-        return model.properties[property]
-    end 
-    error("$(property) is not available as a key")
-end 
+Base.getproperty(model::AbstractABM,property::Symbol) = 
+    property ∈ fieldnames(typeof(model)) ?
+        Base.getfield(model,property) : 
+        Base.getindex(model.properties,property)
+
+
 
 #========================================
 Functionalities for agents within an ABM
