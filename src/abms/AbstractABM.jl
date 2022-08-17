@@ -68,6 +68,9 @@ function add_agent!(agent::AbstractAgent,model::AbstractABM) # where T <: Abstra
     push!(model.agentsList,agent)
 end 
 
+"symmetry"
+add_agent!(abm::AbstractABM,agent::AbstractAgent) = add_agent!(agent,abm)
+
 #=
 "add agent to the model"
 function add_agent!(agent,pos,model::AgentBasedModel) 
