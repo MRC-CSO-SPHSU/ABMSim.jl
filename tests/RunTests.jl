@@ -19,28 +19,32 @@ using MultiAgents: initMultiAgents, verifyAgentsJLContract,
 @testset "MultiAgents Components Testing" begin
     
     initMultiAgents()
-    
+
     mutable struct Person <: AbstractXAgent 
         id::Int 
         pos 
+
+        Person(position) = new(getIDCOUNTER(),position)
     end 
 
     # List of persons 
-    person1 = Person(getIDCOUNTER(),"Edinbrugh") 
+    person1 = Person("Edinbrugh") 
     person2 = person1               
-    person3 = Person(getIDCOUNTER(),"Abderdeen") 
-    person4 = Person(getIDCOUNTER(),"Edinbrugh") 
-    person5 = Person(getIDCOUNTER(),"Glasgow")
-    person6 = Person(getIDCOUNTER(),"Edinbrugh") 
+    person3 = Person("Abderdeen") 
+    person4 = Person("Edinbrugh") 
+    person5 = Person("Glasgow")
+    person6 = Person("Edinbrugh") 
 
     @testset verbose=true "AbstractAgent verification" begin
 
         @test verifyAgentsJLContract(person3)
         @test verifyAgentsJLContract(Person)
 
-        println(person1.id) 
-        println(person3.id)
+        @test person1.id == 1 
+        @test person3.id == 2
 
     end 
+
+    nothing
 
 end  # testset MultiAgents components 
