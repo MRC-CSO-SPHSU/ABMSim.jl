@@ -57,11 +57,16 @@ using MultiAgents: add_agent!, kill_agent!
     add_agent!(person5,population)
     add_agent!(person6,population) 
 
+    println(typeof(population.properties)) 
+    population.properties[:startTime] = 1900 
+
     @testset verbose=true "ABM functionalities validation" begin
 
         @test !verifyAgentsJLContract(population)
         kill_agent!(person2,population)
         @test verifyAgentsJLContract(population)
+
+        @test population.startTime == 1900
 
     end 
 
