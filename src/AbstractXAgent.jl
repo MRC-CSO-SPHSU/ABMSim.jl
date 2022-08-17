@@ -11,7 +11,7 @@ to be directly usable
 """
 
 export AbstractAgent, AbstractXAgent
-export verify, getIDCOUNTER
+export verifyAgentsJLContract, getIDCOUNTER
 
 "The ID assigned to an agent for every new agent"
 global IDCOUNTER = 0::Int              # This is differnt than agents.jl 
@@ -20,12 +20,20 @@ global IDCOUNTER = 0::Int              # This is differnt than agents.jl
 getIDCOUNTER() = global IDCOUNTER = IDCOUNTER + 1 
                                                  
 "Supertype of any Agent type"
-abstract type AbstractAgent end          # to be replaceable by > using Agents.jl 
+abstract type AbstractAgent end        # to be replaceable by > using Agents.jl 
   
 "Verify the requirements of abstract agent type"
-function verify(a::AbstractAgent) 
-    :id in fieldnames(typeof(a)) && :pos in fieldnames(typeof(a))  # Agents.jl requirement 
+function verifyAgentsJLContract(a::AbstractAgent) 
+    verifyAgentsJLContract(typeof(a))  
 end 
+
+"verify that a data type follows AbstractAgent contract" 
+function verifyAgentsJLContract(agentType::DataType)
+    agentType <: AbstractAgent &&  
+        :id in fieldnames(agentType) && :pos in fieldnames(agentType) # Agents.jl requirement 
+end
+
+    
 
 
 """

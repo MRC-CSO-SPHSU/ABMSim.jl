@@ -12,7 +12,7 @@ using Test
 
 # agents 
 using MultiAgents: AbstractXAgent 
-using MultiAgents: getIDCOUNTER
+using MultiAgents: verifyAgentsJLContract, getIDCOUNTER
 
 @testset "MultiAgents Components Testing" begin
     
@@ -29,5 +29,11 @@ using MultiAgents: getIDCOUNTER
     person5 = Person(getIDCOUNTER(),"Glasgow")
     person6 = Person(getIDCOUNTER(),"Edinbrugh") 
 
+    @testset verbose=true "AbstractAgent verification" begin
+
+        @test verifyAgentsJLContract(person3)
+        @test verifyAgentsJLContract(Person)
+
+    end 
 
 end  # testset MultiAgents components 
