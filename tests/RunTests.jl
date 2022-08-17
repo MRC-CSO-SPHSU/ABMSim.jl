@@ -12,9 +12,13 @@ using Test
 
 # agents 
 using MultiAgents: AbstractXAgent 
-using MultiAgents: verifyAgentsJLContract, getIDCOUNTER
+using MultiAgents: initMultiAgents, verifyAgentsJLContract, 
+                   getIDCOUNTER
+                   
 
 @testset "MultiAgents Components Testing" begin
+    
+    initMultiAgents()
     
     mutable struct Person <: AbstractXAgent 
         id::Int 
@@ -33,6 +37,9 @@ using MultiAgents: verifyAgentsJLContract, getIDCOUNTER
 
         @test verifyAgentsJLContract(person3)
         @test verifyAgentsJLContract(Person)
+
+        println(person1.id) 
+        println(person3.id)
 
     end 
 
