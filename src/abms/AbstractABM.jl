@@ -10,6 +10,7 @@ export AbstractABM
 export allagents, nagents
 export add_agent!, move_agent!, kill_agent!
 export step!, dummystep, errorstep, defaultprestep!, defaultpoststep! 
+export verifyAgentsJLContract
 
 
 "Abstract ABM resembles the ABM concept from Agents.jl"
@@ -83,6 +84,8 @@ move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 
 "remove an agent"
 kill_agent!(agent,model::AbstractABM) = removefirst!(model.agentsList,agent) 
+
+kill_agent!(model::AbstractABM,agent) = kill_agent!(agent,model)
 
 #=
 Other potential functions 
@@ -241,6 +244,13 @@ function step!(
 
 end # step! 
 
+"verify that basic elements "
+function verifyAgentsJLContract(model::AbstractABM)
+    #= all ids are unique =# 
+    agents = allagents(model)
+    ids    = [ id for agent in agents for id = agent.id]
+    length(ids) == length(Set(ids))
+end
 
 #=
 
