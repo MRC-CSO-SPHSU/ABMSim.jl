@@ -57,9 +57,9 @@ finishTime(abm)  = abm.properties[:finishTime]
 
 "Initialize default properties"
 function initDefaultProp!(abm::ABM{AgentType};
-                          currstep=0,dt=0,stepnumber=0,
+                          dt=0,stepnumber=0,
                           startTime=0, finishTime=0) where AgentType 
-    abm.properties[:currstep]   = currstep 
+    abm.properties[:currstep]   = startTime 
     abm.properties[:dt]         = dt
     abm.properties[:stepnumber] = stepnumber 
     abm.properties[:startTime]  = startTime
