@@ -15,7 +15,10 @@ using MultiAgents: AbstractXAgent
 using MultiAgents: initMultiAgents, verifyAgentsJLContract, 
                    getIDCOUNTER
 using MultiAgents: ABM
-using MultiAgents: add_agent!, kill_agent!
+using MultiAgents: add_agent!, kill_agent!, seed!, nagents
+using MultiAgents: errorstep, dummystep
+using MultiAgents: initDefaultProp!, defaultprestep!, defaultpoststep!,
+                    currstep, stepnumber, dt
                    
 
 @testset "MultiAgents Components Testing" begin
@@ -57,8 +60,7 @@ using MultiAgents: add_agent!, kill_agent!
     add_agent!(person5,population)
     add_agent!(person6,population) 
 
-    println(typeof(population.properties)) 
-    population.properties[:startTime] = 1900 
+    initDefaultProp!(population,dt=1,startTime=1900)
 
     @testset verbose=true "ABM functionalities validation" begin
 
@@ -67,6 +69,35 @@ using MultiAgents: add_agent!, kill_agent!
         @test verifyAgentsJLContract(population)
 
         @test population.startTime == 1900
+
+        @test population[1] == person1
+
+        @test seed!(population,1) skip=true
+
+        kill_agent!(person2,population)
+        @test_throws ArgumentError kill_agent!(person1,population)
+        @test nagents(population) == 4
+
+        add_agent!(person1,population) 
+        @test nagents(population) == 5
+
+        @test move_agent!(person1,"The Highlands",population) skip=true
+
+
+    end 
+
+    @testset verbose=true "pre-defined stepping functions of ABMs" begin
+
+        @test dummystep(population) == nothing 
+        @test dummystep(person1, population) == nothing 
+
+        @test_throws ErrorException errorstep(population) 
+
+        defaultprestep!(population)
+        @test stepnumber(population) == 1 
+        
+        defaultpoststep!(population) == nothing
+        @test currstep(population) > 0
 
     end 
 
