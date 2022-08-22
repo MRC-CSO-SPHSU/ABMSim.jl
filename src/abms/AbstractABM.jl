@@ -254,6 +254,13 @@ function step!(
 
 end # step! 
 
+
+"ensure symmetry when initializing ABMs via their declaration"
+initial_connect!(abm2::T2,
+                 abm1::T1,
+                 pars) where {T1 <: AbstractABM,T2 <: AbstractABM} = initial_connect!(abm1,abm2,pars)
+
+
 #=
 
 "set a symbol property to a model without overwriting"
