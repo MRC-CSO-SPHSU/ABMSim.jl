@@ -16,7 +16,7 @@ export verifyAgentsJLContract
 "Abstract ABM resembles the ABM concept from Agents.jl"
 abstract type AbstractABM end 
 
-"interfac3e used by verifyAgentsJLContract functions"
+"interface used by verifyAgentsJLContract functions"
 function allagents(::AbstractABM)::Vector{AgentType} where AgentType <: AbstractAgent end
 
 "verify that basic elements "
@@ -35,9 +35,8 @@ Fields of an ABM
 =########################################
 
 "An AbstractABM subtype to have a list of agents"
-function allagents(model::AbstractABM)#::Array{AgentType,1} where AgentType <: AbstractAgent
-    model.agentsList
-end 
+allagents(model::AbstractABM) = model.agentsList
+
 
 "add a symbol property to a model"
 Base.getproperty(model::AbstractABM,property::Symbol) = 
@@ -45,6 +44,11 @@ Base.getproperty(model::AbstractABM,property::Symbol) =
         Base.getfield(model,property) : 
         Base.getindex(model.properties,property)
 
+#=Base.setproperty(model::AbstractABM,property::Symbol,val) = 
+    property ∈ fieldnames(typeof(model)) ?
+        Base.setfield(model,property,val) : 
+        Base.setindex(model.properties,property,val)
+=#
 
 # equivalent to operator [], i.e. model[id] 
 "@return the id-th agent (Agents.jl)"
@@ -57,6 +61,8 @@ function Base.getindex(model::AbstractABM,id::Int64)
     end   
     error("index id in $model does not exist")
 end 
+
+
 
 #========================================
 Functionalities for agents within an ABM
