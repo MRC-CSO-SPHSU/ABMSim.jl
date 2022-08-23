@@ -9,21 +9,34 @@ using SomeUtil: removefirst!
 export AbstractABM 
 export allagents, nagents
 export add_agent!, move_agent!, kill_agent!
-export step!, dummystep, errorstep, defaultprestep!, defaultpoststep! 
+export step!, dummystep, errorstep
 export verifyAgentsJLContract
 
 
 "Abstract ABM resembles the ABM concept from Agents.jl"
 abstract type AbstractABM end 
 
+"interface used by verifyAgentsJLContract functions"
+function allagents(::AbstractABM)::Vector{AgentType} where AgentType <: AbstractAgent end
+
+"verify that basic elements "
+function verifyAgentsJLContract(model::AbstractABM)
+    #= all ids are unique =# 
+    agents = allagents(model)
+    ids    = [ id for agent in agents for id = agent.id]
+    length(ids) == length(Set(ids))
+end
+
+
+# The following part is to be seperated in an another file, to be excluded
+# when agents.jl is used 
 #========================================
 Fields of an ABM
 =########################################
 
 "An AbstractABM subtype to have a list of agents"
-function allagents(model::AbstractABM)#::Array{AgentType,1} where AgentType <: AbstractAgent
-    model.agentsList
-end 
+allagents(model::AbstractABM) = model.agentsList
+
 
 "add a symbol property to a model"
 Base.getproperty(model::AbstractABM,property::Symbol) = 
@@ -31,16 +44,30 @@ Base.getproperty(model::AbstractABM,property::Symbol) =
         Base.getfield(model,property) : 
         Base.getindex(model.properties,property)
 
+#=Base.setproperty(model::AbstractABM,property::Symbol,val) = 
+    property ∈ fieldnames(typeof(model)) ?
+        Base.setfield(model,property,val) : 
+        Base.setindex(model.properties,property,val)
+=#
+
+# equivalent to operator [], i.e. model[id] 
+"@return the id-th agent (Agents.jl)"
+function Base.getindex(model::AbstractABM,id::Int64) 
+    agents = allagents(model) 
+    for agent in agents
+        if agent.id == id 
+            return agent
+        end 
+    end   
+    error("index id in $model does not exist")
+end 
+
 
 
 #========================================
 Functionalities for agents within an ABM
 =########################################
 
-"return the id-th agent (Agents.jl)"
-getindex(model::AbstractABM,id) = error("not implemented")
-    
-# equivalent to operator [], i.e. model[id] 
 
 "random seed of the model (Agents.jl)"
 seed!(model::AbstractABM,seed) = error("not implemented") 
@@ -83,8 +110,9 @@ end
 move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 
 "remove an agent"
-kill_agent!(agent,model::AbstractABM) = removefirst!(model.agentsList,agent) 
+kill_agent!(agent,model::AbstractABM) = removefirst!(model.agentsList,agent)
 
+"symmety"
 kill_agent!(model::AbstractABM,agent) = kill_agent!(agent,model)
 
 #=
@@ -108,18 +136,6 @@ errorstep(::AbstractAgent,::AbstractABM) = error("agent stepping function has no
 
 "Default model stepping function for reminding the client that it should be provided"
 errorstep(::AbstractABM) = error("model stepping function has not been specified")
-
-"Default instructions before stepping an abm"
-function defaultprestep!(abm::AbstractABM) 
-    abm.properties[:stepnumber] = abm.properties[:stepnumber] + 1 
-    nothing 
-end
-
-"Default instructions after stepping an abm"
-function defaultpoststep!(abm::AbstractABM) 
-    abm.properties[:currstep] =  abm.properties[:currstep] + abm.properties[:dt] 
-    nothing 
-end
 
 
 """
@@ -244,13 +260,12 @@ function step!(
 
 end # step! 
 
-"verify that basic elements "
-function verifyAgentsJLContract(model::AbstractABM)
-    #= all ids are unique =# 
-    agents = allagents(model)
-    ids    = [ id for agent in agents for id = agent.id]
-    length(ids) == length(Set(ids))
-end
+
+"ensure symmetry when initializing ABMs via their declaration"
+initial_connect!(abm2::T2,
+                 abm1::T1,
+                 pars) where {T1 <: AbstractABM,T2 <: AbstractABM} = initial_connect!(abm1,abm2,pars)
+
 
 #=
 

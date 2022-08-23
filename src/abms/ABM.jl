@@ -7,7 +7,9 @@
 
 using  SomeUtil: read2DArray
 
-export ABM, initial_connect!, attach2DData!
+export ABM, initial_connect!, attach2DData!, initDefaultProp!
+export defaultprestep!, defaultpoststep!
+export currstep, stepnumber, dt, startTime, finishTime
 
 # dummydeclare(dict::Dict{Symbol}=Dict{Symbol}()) = nothing 
 
@@ -44,10 +46,37 @@ end # AgentBasedModel
 ""
 function attach2DData!(abm::ABM{AgentType}, symbol::Symbol, fname ) where AgentType 
     abm.data[symbol] = read2DArray(fname) 
+    nothing 
 end
 
- 
-"ensure symmetry"
-initial_connect!(abm2::ABM{T2},
-                 abm1::ABM{T1},
-                 pars) where {T1 <: AbstractABM,T2 <: AbstractABM} = initial_connect!(abm1,abm2,pars)
+currstep(abm)    = abm.properties[:currstep] 
+dt(abm)          = abm.properties[:dt] 
+stepnumber(abm)  = abm.properties[:stepnumber] 
+startTime(abm)   = abm.properties[:startTime] 
+finishTime(abm)  = abm.properties[:finishTime] 
+
+"Initialize default properties"
+function initDefaultProp!(abm::ABM{AgentType};
+                          dt=0,stepnumber=0,
+                          startTime=0, finishTime=0) where AgentType 
+    abm.properties[:currstep]   = startTime 
+    abm.properties[:dt]         = dt
+    abm.properties[:stepnumber] = stepnumber 
+    abm.properties[:startTime]  = startTime
+    abm.properties[:finishTime] = finishTime
+    nothing  
+end 
+
+"Default instructions before stepping an abm"
+function defaultprestep!(abm::ABM{AgentType}) where AgentType 
+    abm.properties[:stepnumber] = stepnumber(abm) + 1 
+    nothing 
+end
+
+"Default instructions after stepping an abm"
+function defaultpoststep!(abm::ABM{AgentType}) where AgentType 
+    abm.properties[:currstep]   =  currstep(abm) + dt(abm)
+    nothing 
+end
+
+
