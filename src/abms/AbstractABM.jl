@@ -44,11 +44,12 @@ Base.getproperty(model::AbstractABM,property::Symbol) =
         Base.getfield(model,property) : 
         Base.getindex(model.properties,property)
 
-#=Base.setproperty(model::AbstractABM,property::Symbol,val) = 
+""
+Base.setproperty!(model::AbstractABM,property::Symbol,val) = 
     property ∈ fieldnames(typeof(model)) ?
         Base.setfield(model,property,val) : 
-        Base.setindex(model.properties,property,val)
-=#
+        model.properties[property] = val
+
 
 # equivalent to operator [], i.e. model[id] 
 "@return the id-th agent (Agents.jl)"
