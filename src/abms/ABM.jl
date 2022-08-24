@@ -69,13 +69,13 @@ end
 
 "Default instructions before stepping an abm"
 function defaultprestep!(abm::ABM{AgentType}) where AgentType 
-    abm.properties[:stepnumber] = stepnumber(abm) + 1 
+    abm.stepnumber += 1 
     nothing 
 end
 
 "Default instructions after stepping an abm"
 function defaultpoststep!(abm::ABM{AgentType}) where AgentType 
-    abm.properties[:currstep]   =  currstep(abm) + dt(abm)
+    abm.currstep   +=  dt(abm)
     nothing 
 end
 
