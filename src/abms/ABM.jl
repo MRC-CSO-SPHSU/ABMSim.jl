@@ -21,8 +21,9 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     it can be made possible to access a symbol like that model.x
     in the same way as Agents.jl 
     """ 
-    properties
+    properties               # model properties Agents.jl   
     data::Dict{Symbol}       # data structure to be improved 
+    parameters               # model parameters ideally as a struct data type
 
     #= TODO
     properties are from Agent
@@ -31,7 +32,7 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
 
     ABM{AgentType}(properties = Dict{Symbol,Any}(); 
         declare::Function = dict -> AgentType[]) where AgentType <: AbstractAgent = 
-             new(declare(properties),deepcopy(properties),Dict{Symbol,Any}())
+             new(declare(properties),deepcopy(properties),Dict{Symbol,Any}(),nothing)
     
     #=         
     ABM{AgentType}(pars; 
