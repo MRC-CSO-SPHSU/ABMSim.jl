@@ -26,19 +26,20 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     parameters               # model parameters ideally as a struct data type
 
     #= TODO
-    properties are from Agent
+    properties are from Agents.jl
     it is good to have parameters, variables etc. (that could be struct or dictionaries?) 
     =#
 
+    #= Deprecated to be removed 
     ABM{AgentType}(properties = Dict{Symbol,Any}(); 
         declare::Function = dict -> AgentType[]) where AgentType <: AbstractAgent = 
              new(declare(properties),deepcopy(properties),Dict{Symbol,Any}(),nothing)
-    
-    #=         
-    ABM{AgentType}(pars; 
-        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
-        new(declare(pars),copy(pars),Dict{Symbol,Any}())         
     =# 
+         
+    ABM{AgentType}(pars = nothing; 
+        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
+        new(declare(pars),Dict{Symbol,Any}(),Dict{Symbol,Any}(),deepcopy(pars))         
+
     
     # ^^^ to add an argument for data with default value empty 
 
