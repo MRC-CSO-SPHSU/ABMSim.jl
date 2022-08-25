@@ -17,17 +17,17 @@ mutable struct MultiABM   <: AbstractMABM
     abms::Array{AbstractABM,1} 
 
     "Dictionary of model properties"
-    properties::Dict{Symbol}
+    properties
 
     """
     Cor expecting a declaration function that declares 
         a list of elemantary ABMs together with
         MABM-level properties  
     """  
-    function MultiABM(properties::Dict{Symbol} = Dict{Symbol,Any}(); 
+    function MultiABM(properties = Dict{Symbol,Any}(); 
                     initialize::Function = dummyinit,  
                     declare::Function) 
-        mabm = new(declare(properties),copy(properties))
+        mabm = new(declare(properties),deepcopy(properties))
         initialize(mabm) 
         mabm
     end 

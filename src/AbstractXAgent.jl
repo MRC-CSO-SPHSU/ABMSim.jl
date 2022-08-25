@@ -11,22 +11,31 @@ to be directly usable
 """
 
 export AbstractAgent, AbstractXAgent
-export verify, getIDCOUNTER
+export verifyAgentsJLContract, getIDCOUNTER, finalize, resetIDCOUNTER
+export terminateMulitAgents
 
 "The ID assigned to an agent for every new agent"
 global IDCOUNTER = 0::Int              # This is differnt than agents.jl 
 
 "A counter for assigning unique ID for each agent"
 getIDCOUNTER() = global IDCOUNTER = IDCOUNTER + 1 
+
+"reset counter to 0"
+resetIDCOUNTER() = global IDCOUNTER = 0
                                                  
 "Supertype of any Agent type"
-abstract type AbstractAgent end          # to be replaceable by > using Agents.jl 
+abstract type AbstractAgent end        # to be replaceable by > using Agents.jl 
   
 "Verify the requirements of abstract agent type"
-function verify(a::AbstractAgent) 
-    :id in fieldnames(typeof(a)) && :pos in fieldnames(typeof(a))  # Agents.jl requirement 
+function verifyAgentsJLContract(a::AbstractAgent) 
+    verifyAgentsJLContract(typeof(a))  
 end 
 
+"verify that a data type follows AbstractAgent contract" 
+function verifyAgentsJLContract(agentType::DataType)
+    agentType <: AbstractAgent &&  
+        :id in fieldnames(agentType) && :pos in fieldnames(agentType) # Agents.jl requirement 
+end
 
 """
 Specific abstract type for the type of agent exampels to be modelled using this package
@@ -34,6 +43,7 @@ X implies that a name of this type of agents is still not determined
 """ 
 abstract type AbstractXAgent <: AbstractAgent end
  
+
 
 #=
 
