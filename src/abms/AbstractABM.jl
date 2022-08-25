@@ -47,7 +47,7 @@ Base.getproperty(model::AbstractABM,property::Symbol) =
 ""
 Base.setproperty!(model::AbstractABM,property::Symbol,val) = 
     property ∈ fieldnames(typeof(model)) ?
-        Base.setfield(model,property,val) : 
+        Base.setfield!(model,property,val) : 
         model.properties[property] = val
 
 
