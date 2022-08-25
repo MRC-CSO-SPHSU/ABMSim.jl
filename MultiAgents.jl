@@ -1,5 +1,7 @@
 module MultiAgents
 
+    export initMultiAgents
+
     include("src/AbstractXAgent.jl")
 
     include("src/abms/AbstractABM.jl")
@@ -17,5 +19,11 @@ module MultiAgents
 
     include("src/simulations/AbstractMABMSimulation.jl")
     include("src/simulations/MABMSimulation.jl") 
+
+    function initMultiAgents()
+        resetIDCOUNTER()
+        nothing 
+    end
+
 
 end 
