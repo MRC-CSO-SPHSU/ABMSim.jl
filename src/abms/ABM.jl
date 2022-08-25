@@ -57,6 +57,8 @@ stepnumber(abm)  = abm.properties[:stepnumber]
 startTime(abm)   = abm.properties[:startTime] 
 finishTime(abm)  = abm.properties[:finishTime] 
 
+# initDefaultProp!(abm::ABM{AgentType},properties::Dict{Symbol,Any}) = abm.properties = deepcopy(properties) 
+
 "Initialize default properties"
 function initDefaultProp!(abm::ABM{AgentType};
                           dt=0,stepnumber=0,
