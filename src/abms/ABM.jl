@@ -21,23 +21,25 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     it can be made possible to access a symbol like that model.x
     in the same way as Agents.jl 
     """ 
-    properties
+    properties               # model properties Agents.jl   
     data::Dict{Symbol}       # data structure to be improved 
+    parameters               # model parameters ideally as a struct data type
 
     #= TODO
-    properties are from Agent
+    properties are from Agents.jl
     it is good to have parameters, variables etc. (that could be struct or dictionaries?) 
     =#
 
+    #= Deprecated to be removed 
     ABM{AgentType}(properties = Dict{Symbol,Any}(); 
         declare::Function = dict -> AgentType[]) where AgentType <: AbstractAgent = 
-             new(declare(properties),deepcopy(properties),Dict{Symbol,Any}())
-    
-    #=         
-    ABM{AgentType}(pars; 
-        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
-        new(declare(pars),copy(pars),Dict{Symbol,Any}())         
+             new(declare(properties),deepcopy(properties),Dict{Symbol,Any}(),nothing)
     =# 
+         
+    ABM{AgentType}(pars = nothing; 
+        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
+        new(declare(pars),Dict{Symbol,Any}(),Dict{Symbol,Any}(),deepcopy(pars))         
+
     
     # ^^^ to add an argument for data with default value empty 
 
@@ -55,6 +57,8 @@ stepnumber(abm)  = abm.properties[:stepnumber]
 startTime(abm)   = abm.properties[:startTime] 
 finishTime(abm)  = abm.properties[:finishTime] 
 
+# initDefaultProp!(abm::ABM{AgentType},properties::Dict{Symbol,Any}) = abm.properties = deepcopy(properties) 
+
 "Initialize default properties"
 function initDefaultProp!(abm::ABM{AgentType};
                           dt=0,stepnumber=0,
@@ -69,13 +73,13 @@ end
 
 "Default instructions before stepping an abm"
 function defaultprestep!(abm::ABM{AgentType}) where AgentType 
-    abm.properties[:stepnumber] = stepnumber(abm) + 1 
+    abm.stepnumber += 1 
     nothing 
 end
 
 "Default instructions after stepping an abm"
 function defaultpoststep!(abm::ABM{AgentType}) where AgentType 
-    abm.properties[:currstep]   =  currstep(abm) + dt(abm)
+    abm.currstep   +=  dt(abm)
     nothing 
 end
 

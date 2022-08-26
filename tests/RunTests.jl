@@ -113,13 +113,14 @@ using MultiAgents: step!
     end 
 
     function population_step!(population::ABM{Person})
-        population.properties[:currstep] = population.currstep + dt(population)
-        # population.currstep += dt(population) 
+        population.currstep += dt(population)
         population.stepnumber += 1
         nothing 
     end
     
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
+
+        initDefaultProp!(population,dt=1//12,startTime=1900//1)
 
         age_step!(person1,population) 
         @test person1.age > 46 
@@ -130,9 +131,13 @@ using MultiAgents: step!
         step!(population,age_step!,12) 
         @test person1.age > 47 && person6.age > 30
 
-        step!(population,age_step!,population_step!,24)
-        @test person1.age > 49 && person6.age > 32
+        step!(population,age_step!,population_step!,12)
+        @test person1.age > 48 && person6.age > 31
 
+        step!(population,defaultprestep!,age_step!,defaultpoststep!,12)
+        @test person1.age > 49 && person6.age > 32
+        @test population.currstep == 1902 &&  population.stepnumber == 24 
+        
     end 
     
 
