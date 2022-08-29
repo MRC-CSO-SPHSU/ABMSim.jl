@@ -4,7 +4,7 @@ Definition of an ABM-Simulation type.
 
 export ABMSimulation 
 
-using MultiAgents: errorstep 
+using MultiAgents: defaultpoststep!, defaultprestep! 
 
 using SomeUtil:    AbstractExample, DummyExample 
 
@@ -18,7 +18,7 @@ mutable struct ABMSimulation <: AbstractABMSimulation
 
     function ABMSimulation(abm::AbstractABM,properties::Dict{Symbol};
                                  example::AbstractExample=DummyExample()) 
-        abmsimulation = new(abm,properties,[errorstep],[errorstep],[errorstep])
+        abmsimulation = new(abm,properties,[defaultprestep!],[],[defaultpoststep!])
         setup!(abmsimulation,example)
         abmsimulation 
     end
