@@ -38,7 +38,7 @@ Fields of an ABM
 allagents(model::AbstractABM) = model.agentsList
 
 
-"add a symbol property to a model"
+"get a symbol property from a model"
 Base.getproperty(model::AbstractABM,property::Symbol) = 
     property ∈ fieldnames(typeof(model)) ?
         Base.getfield(model,property) : 
