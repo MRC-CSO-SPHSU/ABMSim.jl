@@ -2,6 +2,8 @@ module MultiAgents
 
     export initMultiAgents
 
+    MAVersion() = v"0.2.2"
+
     include("src/AbstractXAgent.jl")
 
     include("src/abms/AbstractABM.jl")
