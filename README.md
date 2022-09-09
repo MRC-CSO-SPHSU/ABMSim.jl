@@ -8,3 +8,4 @@ Julia package for modeling and simulation of Multi-agent based models
 - **V0.2** (25-08-2022) : ABM-type has parameter fields + Unit Testing (Agents & ABMs)
 
    - V0.2.1   (29-08-2022) : Minor simplifcation when using MABMSimulation
+   - V0.2.2   (09-09-2022) : ABM.propoerties look like structure if declared as dictionaries, initializing MA for reseting ID coutner, version number const
