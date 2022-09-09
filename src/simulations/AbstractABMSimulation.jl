@@ -19,6 +19,19 @@ abstract type AbstractABMSimulation <: AbstractSimulation end
 """
 setup!(::AbstractABMSimulation,::AbstractExample) = nothing  
 
+"get a symbol property from a Simulation"
+Base.getproperty(sim::AbstractABMSimulation,property::Symbol) = 
+    property ∈ fieldnames(typeof(sim)) ?
+        Base.getfield(sim,property) : 
+        Base.getindex(sim.properties,property)
+
+""
+Base.setproperty!(sim::AbstractABMSimulation,property::Symbol,val) = 
+    property ∈ fieldnames(typeof(sim)) ?
+        Base.setfield!(sim,property,val) : 
+        sim.properties[property] = val
+
+
 # attaching a stepping function is done via a function call, 
 # since data structure is subject to change, e.g. Vector{Function}
 
@@ -53,10 +66,9 @@ step!(simulation::AbstractABMSimulation,
                         n)
 
 "Run a simulation of an ABM"
-run!(simulation::AbstractABMSimulation;verbose::Bool=false) = 
+run!(simulation::AbstractABMSimulation) = 
                 run!(simulation, 
                      simulation.pre_model_steps,
                      simulation.agent_steps,
-                     simulation.post_model_steps,
-                     verbose=verbose)
+                     simulation.post_model_steps)
 
