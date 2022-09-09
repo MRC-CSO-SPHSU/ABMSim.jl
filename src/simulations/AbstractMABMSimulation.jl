@@ -27,13 +27,13 @@ function step!(sim::AbstractMABMSimulation,n::Int=1)
 end
 
 "Run a simulation for a given MABM"
-function run!(sim::AbstractMABMSimulation;verbose::Bool=false,yearly=true)  
+function run!(sim::AbstractMABMSimulation;yearly=true)  
 
     Random.seed!(seed(sim))
     
     n = length(sim.simulations)
     for simulation_step in range(startTime(sim),finishTime(sim),step=dt(sim))
-        verbose ? verboseStep(simulation_step,yearly) : nothing 
+        false && sim.verbose ? verboseStep(simulation_step,yearly) : nothing 
         step!(sim) 
     end
 
