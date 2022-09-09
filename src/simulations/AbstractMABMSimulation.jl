@@ -33,7 +33,7 @@ function run!(sim::AbstractMABMSimulation;yearly=true)
     
     n = length(sim.simulations)
     for simulation_step in range(startTime(sim),finishTime(sim),step=dt(sim))
-        sim.verbose ? verboseStep(simulation_step,yearly) : nothing 
+        false && sim.verbose ? verboseStep(simulation_step,yearly) : nothing 
         step!(sim) 
     end
 
