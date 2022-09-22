@@ -9,6 +9,10 @@ export AbstractABMSimulation
 export attach_agent_step!, attach_pre_model_step!, attach_post_model_step!
 export setup!, step!, run! 
 
+export initDefaultProp!
+export defaultprestep!, defaultpoststep!
+export currstep, stepnumber, dt, startTime, finishTime
+
 "Abstract type for ABMs" 
 abstract type AbstractABMSimulation <: AbstractSimulation end 
 
@@ -71,4 +75,37 @@ run!(simulation::AbstractABMSimulation) =
                      simulation.pre_model_steps,
                      simulation.agent_steps,
                      simulation.post_model_steps)
+
+
+currstep(sim)    = sim.properties[:currstep] 
+dt(sim))         = sim.properties[:dt] 
+stepnumber(sim)  = sim.properties[:stepnumber] 
+startTime(sim)   = sim.properties[:startTime] 
+finishTime(sim)  = sim.properties[:finishTime] 
+
+# initDefaultProp!(abm::ABM{AgentType},properties::Dict{Symbol,Any}) = abm.properties = deepcopy(properties) 
+
+"Initialize default properties"
+function initDefaultProp!(sim::AbstractSimulation;
+                          dt=0,stepnumber=0,
+                          startTime=0, finishTime=0) 
+    sim.properties[:currstep]   = Rational{Int}(startTime) 
+    sim.properties[:dt]         = dt
+    sim.properties[:stepnumber] = stepnumber 
+    sim.properties[:startTime]  = startTime
+    sim.properties[:finishTime] = finishTime
+    nothing  
+end 
+
+"Default instructions before stepping an abm"
+function defaultprestep!(abm::ABM{AgentType},sim::AbstractSimulation) where AgentType 
+    sim.properties[:stepnumber] += 1 
+    nothing 
+end
+
+"Default instructions after stepping an abm"
+function defaultpoststep!(abm::ABM{AgentType),sim::AbstractSimulation) where AgentType 
+    sim.properties[:currstep]   +=  dt(sim)
+    nothing 
+end
 
