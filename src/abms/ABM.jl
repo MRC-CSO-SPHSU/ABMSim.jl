@@ -5,9 +5,7 @@
     for running an ABM simulation. (An imitation of Agents.jl) 
 """ 
 
-using  SomeUtil: read2DArray
-
-export ABM, initial_connect!, attach2DData!, initDefaultProp!
+export ABM, initial_connect!, initDefaultProp!
 export defaultprestep!, defaultpoststep!
 export currstep, stepnumber, dt, startTime, finishTime
 
@@ -15,41 +13,24 @@ export currstep, stepnumber, dt, startTime, finishTime
 
 "Agent based model specification for social simulations"
 mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
-    agentsList::Array{AgentType,1}
+    agentsList::Vector{AgentType}
     """
     Dictionary mapping symbols (e.g. :x) to values 
     it can be made possible to access a symbol like that model.x
     in the same way as Agents.jl 
     """ 
-    properties               # model properties Agents.jl   
-    data::Dict{Symbol}       # data structure to be improved 
     parameters               # model parameters ideally as a struct data type
-
-    #= TODO
-    properties are from Agents.jl
-    it is good to have parameters, variables etc. (that could be struct or dictionaries?) 
-    =#
-
-    #= Deprecated to be removed 
-    ABM{AgentType}(properties = Dict{Symbol,Any}(); 
-        declare::Function = dict -> AgentType[]) where AgentType <: AbstractAgent = 
-             new(declare(properties),deepcopy(properties),Dict{Symbol,Any}(),nothing)
-    =# 
-         
-    ABM{AgentType}(pars = nothing; 
-        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
-        new(declare(pars),Dict{Symbol,Any}(),Dict{Symbol,Any}(),deepcopy(pars))         
-
+    data                     # data structure to be improved 
+    properties               # model properties Agents.jl   
     
-    # ^^^ to add an argument for data with default value empty 
+    ABM(agents::Vector{AgentType},pars,da)  where AgentType  = 
+        new{AgentType}(agents,deepcopy(pars),da,Dict{Symbol,Any}()) 
 
+    ABM{AgentType}(pars=nothing,da=nothing; 
+        declare::Function = pars -> Vector{AgentType}()) where AgentType  = 
+        ABM(declare(pars),pars,da)
+    
 end # AgentBasedModel  
-
-""
-function attach2DData!(abm::ABM{AgentType}, symbol::Symbol, fname ) where AgentType 
-    abm.data[symbol] = read2DArray(fname) 
-    nothing 
-end
 
 currstep(abm)    = abm.properties[:currstep] 
 dt(abm)          = abm.properties[:dt] 
@@ -63,7 +44,7 @@ finishTime(abm)  = abm.properties[:finishTime]
 function initDefaultProp!(abm::ABM{AgentType};
                           dt=0,stepnumber=0,
                           startTime=0, finishTime=0) where AgentType 
-    abm.properties[:currstep]   = startTime 
+    abm.properties[:currstep]   = Rational{Int}(startTime) 
     abm.properties[:dt]         = dt
     abm.properties[:stepnumber] = stepnumber 
     abm.properties[:startTime]  = startTime
