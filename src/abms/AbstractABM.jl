@@ -17,7 +17,10 @@ export verifyAgentsJLContract
 abstract type AbstractABM end 
 
 "interface used by verifyAgentsJLContract functions"
-function allagents(::AbstractABM)::Vector{AgentType} where AgentType <: AbstractAgent end
+# function allagents(::AbstractABM)::Vector{AgentType} where AgentType <: AbstractAgent end
+
+"An AbstractABM subtype to have a list of agents"
+allagents(model::AbstractABM) = model.agentsList
 
 "verify that basic elements "
 function verifyAgentsJLContract(model::AbstractABM)
@@ -34,8 +37,7 @@ end
 Fields of an ABM
 =########################################
 
-"An AbstractABM subtype to have a list of agents"
-allagents(model::AbstractABM) = model.agentsList
+
 
 
 "get a symbol property from a model"
