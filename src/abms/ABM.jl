@@ -15,7 +15,7 @@ export currstep, stepnumber, dt, startTime, finishTime
 
 "Agent based model specification for social simulations"
 mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
-    agentsList::Array{AgentType,1}
+    agentsList::Vector{AgentType}
     """
     Dictionary mapping symbols (e.g. :x) to values 
     it can be made possible to access a symbol like that model.x
@@ -37,7 +37,7 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     =# 
          
     ABM{AgentType}(pars = nothing; 
-        declare::Function = pars -> AgentType[]) where AgentType <: AbstractAgent = 
+        declare::Function = pars -> Vector{AgentType}()) where AgentType <: AbstractAgent = 
         new(declare(pars),Dict{Symbol,Any}(),Dict{Symbol,Any}(),deepcopy(pars))         
 
     
