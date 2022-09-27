@@ -38,8 +38,6 @@ Fields of an ABM
 =########################################
 
 
-
-
 "get a symbol property from a model"
 Base.getproperty(model::AbstractABM,property::Symbol) = 
     property ∈ fieldnames(typeof(model)) ?
@@ -227,42 +225,6 @@ function step!(
     end
 
 end # step! 
-
-"""
-Step an ABM given a set of independent stepping functions
-    pre_model_steps[:](modelObj::AgentBasedModel)
-    agent_steps[:](agentObj,modelObj::AgentBasedModel) 
-    model_step[:](modelObj::AgentBasedModel)
-    n::number of steps 
-"""
-function step!(
-    model::AbstractABM,
-    pre_model_steps::Vector{Function}, 
-    agent_steps::Vector{Function},
-    post_model_steps::Vector{Function},  
-    n::Int=1,
-)  
-    
-    for i in range(1,n)
-        
-        for k in 1:length(pre_model_steps)
-            pre_model_steps[k](model)
-        end
-    
-        for agent in model.agentsList
-            for k in 1:length(agent_steps)
-                agent_steps[k](agent,model)
-            end 
-        end
-        
-        for k in 1:length(post_model_steps)
-            post_model_steps[k](model)
-        end
-    
-    end
-
-end # step! 
-
 
 "ensure symmetry when initializing ABMs via their declaration"
 initial_connect!(abm2::T2,

@@ -9,9 +9,7 @@ export AbstractABMSimulation
 export attach_agent_step!, attach_pre_model_step!, attach_post_model_step!
 export setup!, step!, run! 
 
-export initDefaultProp!
 export defaultprestep!, defaultpoststep!
-export currstep, stepnumber, dt, startTime, finishTime
 
 "Abstract type for ABMs" 
 abstract type AbstractABMSimulation <: AbstractSimulation end 
@@ -23,6 +21,8 @@ abstract type AbstractABMSimulation <: AbstractSimulation end
 """
 setup!(::AbstractABMSimulation,::AbstractExample) = nothing  
 
+
+#=  TODO update with sim.parameters 
 "get a symbol property from a Simulation"
 Base.getproperty(sim::AbstractABMSimulation,property::Symbol) = 
     property ∈ fieldnames(typeof(sim)) ?
@@ -35,6 +35,7 @@ Base.setproperty!(sim::AbstractABMSimulation,property::Symbol,val) =
         Base.setfield!(sim,property,val) : 
         sim.properties[property] = val
 
+=# 
 
 # attaching a stepping function is done via a function call, 
 # since data structure is subject to change, e.g. Vector{Function}
@@ -61,6 +62,7 @@ function attach_post_model_step!(simulation::AbstractABMSimulation,
     nothing
 end 
 
+
 "step a simulation"
 step!(simulation::AbstractABMSimulation,
       n::Int=1) = step!(simulation,
@@ -76,27 +78,6 @@ run!(simulation::AbstractABMSimulation) =
                      simulation.agent_steps,
                      simulation.post_model_steps)
 
-
-currstep(sim)    = sim.properties[:currstep] 
-dt(sim))         = sim.properties[:dt] 
-stepnumber(sim)  = sim.properties[:stepnumber] 
-startTime(sim)   = sim.properties[:startTime] 
-finishTime(sim)  = sim.properties[:finishTime] 
-
-# initDefaultProp!(abm::ABM{AgentType},properties::Dict{Symbol,Any}) = abm.properties = deepcopy(properties) 
-
-"Initialize default properties"
-function initDefaultProp!(sim::AbstractSimulation;
-                          dt=0,stepnumber=0,
-                          startTime=0, finishTime=0) 
-    sim.properties[:currstep]   = Rational{Int}(startTime) 
-    sim.properties[:dt]         = dt
-    sim.properties[:stepnumber] = stepnumber 
-    sim.properties[:startTime]  = startTime
-    sim.properties[:finishTime] = finishTime
-    nothing  
-end 
-
 "Default instructions before stepping an abm"
 function defaultprestep!(abm::ABM{AgentType},sim::AbstractSimulation) where AgentType 
     sim.properties[:stepnumber] += 1 
@@ -104,8 +85,152 @@ function defaultprestep!(abm::ABM{AgentType},sim::AbstractSimulation) where Agen
 end
 
 "Default instructions after stepping an abm"
-function defaultpoststep!(abm::ABM{AgentType),sim::AbstractSimulation) where AgentType 
+function defaultpoststep!(abm::ABM{AgentType},sim::AbstractSimulation) where AgentType 
     sim.properties[:currstep]   +=  dt(sim)
     nothing 
 end
+
+
+
+
+# Other versions of the above function
+#    model_step! is omitted 
+#    n(model,s)::Function 
+#    agent_step! function can be a dummystep 
+
+#===
+Stepping and simulation run function 
+===# 
+
+step!(
+    simulation::DefaultSimulation, 
+    model,
+    agent_step!,
+    model_step!,  
+    n::Int=1,
+    agents_first::Bool=true 
+)  = step!(model,agent_step!,model_step!,n,agents_first)
+
+step!(
+    simulation::DefaultSimulation, 
+    model, 
+    pre_model_step!,
+    agent_step!,
+    post_model_step!,  
+    n::Int=1,
+)  = step!(model,pre_model_step!,agent_step!,post_model_step!,n)
+
+step!(
+    simulation::DefaultSimulation,
+    model::AbstractABM, 
+    pre_model_steps::Vector{Function},
+    agent_steps,
+    post_model_steps,  
+    n::Int=1,
+)  = step!(model,pre_model_steps,agent_steps,post_model_steps,n)
+
+
+function verboseStep(simulation_step::Rational,yearly=true) 
+    (year,month) = date2yearsmonths(simulation_step) 
+    yearly && month == 0 ? println("conducting simulation step year $(year)") : nothing 
+    yearly               ? nothing : println("conducting simulation step year $(year) month $(month+1)")
+end
+
+"""
+Run a simulation using stepping functions
+    - agent_step_function()
+    - model_step_function
+"""
+function run!(simulation::AbstractSimulation,
+              agent_step!,
+              model_step!;
+              verbose::Bool=false,yearly=true) 
+
+    Random.seed!(seed(simulation))
+
+    for simulation_step in range(startTime(simulation),finishTime(simulation),step=dt(simulation))
+        verbose ? verboseStep(simulation_step,yearly) : nothing 
+        step!(simulation,agent_step!,model_step!)
+    end 
+
+end 
+ 
+
+"""
+Run a simulation using stepping functions
+    - agent_step_function()
+    - model_step_function
+"""
+function run!(simulation::AbstractSimulation,
+              pre_model_step!, 
+              agent_step!,
+              post_model_step!;
+              verbose::Bool=false,yearly=true) 
+
+    Random.seed!(seed(simulation))
+
+    for simulation_step in range(startTime(simulation),finishTime(simulation),step=dt(simulation))
+        verbose ? verboseStep(simulation_step,yearly) : nothing 
+        step!(simulation,pre_model_step!,agent_step!,post_model_step!)
+    end 
+
+end 
+ 
+"""
+Run a simulation using stepping functions
+    - agent_step_function()
+    - model_step_function
+"""
+function run!(simulation::AbstractSimulation,
+              pre_model_steps::Vector{Function}, 
+              agent_steps,
+              post_model_steps;
+              verbose::Bool=false,yearly=true) 
+
+    Random.seed!(seed(simulation))
+
+    for simulation_step in range(startTime(simulation),finishTime(simulation),step=dt(simulation))
+        verbose ? verboseStep(simulation_step,yearly) : nothing 
+        step!(simulation,pre_model_steps,agent_steps,post_model_steps)
+    end 
+
+end 
+ 
+
+"""
+Step an ABM given a set of independent stepping functions
+    pre_model_steps[:](modelObj::AgentBasedModel)
+    agent_steps[:](agentObj,modelObj::AgentBasedModel) 
+    model_step[:](modelObj::AgentBasedModel)
+    n::number of steps 
+"""
+function step!(
+    sim::AbstractABMSimulation,
+    model::AbstractABM,
+    pre_model_steps::Vector{Function}, 
+    agent_steps::Vector{Function},
+    post_model_steps::Vector{Function},  
+    n::Int=1
+)  
+    
+    for i in range(1,n)
+        
+        for k in 1:length(pre_model_steps)
+            pre_model_steps[k](model,sim)
+        end
+    
+        for agent in model.agentsList
+            for k in 1:length(agent_steps)
+                agent_steps[k](agent,model,sim)
+            end 
+        end
+        
+        for k in 1:length(post_model_steps)
+            post_model_steps[k](model,sim)
+        end
+    
+    end
+
+end # step! 
+
 
