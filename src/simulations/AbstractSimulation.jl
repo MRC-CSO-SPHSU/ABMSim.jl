@@ -20,7 +20,7 @@ seed(sim::AbstractSimulation)       = sim.parameters.seed
 #example(sim::AbstractSimulation)    = sim.example 
 #time(sim::AbstractSimulation)       = sim.time  
 
-@mix BasicPars 
+@mix struct BasicPars 
     seed::Int 
     startTime::Int 
     finishTime::Int 
@@ -46,11 +46,11 @@ dt(sim::AbsFixedStepSim)         = sim.parameters.dt
 #currstep(sim::AbsFixedStepSim)   = sim.time 
 stepnumber(sim::AbsFixedStepSim) = sim.stepnumber
 
-@mix FixedPars 
+@mix struct FixedPars 
     dt::Rational{Int} 
 end 
 
-@BasicPars @BasicPars mutable struct FixedStepSimPars
+@BasicPars @FixedPars mutable struct FixedStepSimPars
     FixedStepSimPars(dt) = new(0,0,0,dt)
 end
 
@@ -59,11 +59,11 @@ function initDefaultFixedStepSimPars!(sim::AbsFixedStepSim;dt,
 
     initDefaultSimPars!(sim;seed=seed,startTime=startTime,finishTime=finishTime)
     sim.parameters.dt   = dt
-    sim.currstep        = Rational{Int}(startTime) 
+    #sim.currstep        = Rational{Int}(startTime) 
     sim.stepnumber      = 0
 
     nothing 
 end 
 
 
-struct DefaultSimulation <: AbsFixedStepSim end 
+# struct DefaultSimulation <: AbsFixedStepSim end 
