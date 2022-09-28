@@ -12,8 +12,8 @@ export setup!, step!, run!
 export defaultprestep!, defaultpoststep!
 
 "Abstract type for ABMs" 
-abstract type AbstractABMSimulation <: AbstractSimulation end 
-
+abstract type AbstractABMSimulation <: AbsFixedStepSim end
+ 
 """
     default setup the simulation stepping functions in the constructor 
     This guarantees that the client provides proper stepping functions 
