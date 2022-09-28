@@ -11,6 +11,7 @@ import MultiAgents: step!
 
 export stepnumber, dt, startTime, finishTime, seed 
 export initDefaultSimPars!, initDefaultFixedStepSimPars!
+export DefaultSimulation
 
 abstract type AbstractSimulation end 
 
@@ -66,4 +67,31 @@ function initDefaultFixedStepSimPars!(sim::AbsFixedStepSim;dt,
 end 
 
 
-# struct DefaultSimulation <: AbsFixedStepSim end 
+struct DefaultSimulation <: AbsFixedStepSim end 
+
+step!(
+    simulation::DefaultSimulation, 
+    model,
+    agent_step!,
+    model_step!,  
+    n::Int=1,
+    agents_first::Bool=true,
+)  = step!(model,agent_step!,model_step!,n,agents_first)
+
+step!(
+    simulation::DefaultSimulation, 
+    model, 
+    pre_model_step!,
+    agent_step!,
+    post_model_step!,  
+    n::Int=1,
+)  = step!(model,pre_model_step!,agent_step!,post_model_step!,n)
+
+step!(
+    simulation::DefaultSimulation,
+    model::AbstractABM, 
+    pre_model_steps::Vector{Function},
+    agent_steps,
+    post_model_steps,  
+    n::Int=1,
+)  = step!(model,pre_model_steps,agent_steps,post_model_steps,n)
