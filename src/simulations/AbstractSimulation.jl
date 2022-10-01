@@ -5,7 +5,7 @@ This file is included in Simuilations module
 """
 
 using Random
-using SomeUtil:   date2yearsmonths 
+using MultiAgents.Util: date2YearsMonths 
 
 import MultiAgents: step!
 export step!, run!  
@@ -56,7 +56,7 @@ step!(
 
 
 function verboseStep(simulation_step::Rational,yearly=true) 
-    (year,month) = date2yearsmonths(simulation_step) 
+    (year,month) = date2YearsMonths(simulation_step) 
     yearly && month == 0 ? println("conducting simulation step year $(year)") : nothing 
     yearly               ? nothing : println("conducting simulation step year $(year) month $(month+1)")
 end
