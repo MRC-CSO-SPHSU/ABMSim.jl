@@ -87,9 +87,11 @@ function verboseStep(sim::AbsFixedStepSim)
 end
 
 """
-Run a simulation using stepping functions
+Run a fixed step ABM simulation using stepping functions
     - agent_step
-    - model_step
+    - model_step 
+    & 
+    - abstract fxed step simulaton parameters 
 """
 function run!(model::AbstractABM,
               agent_step!,
@@ -101,6 +103,7 @@ function run!(model::AbstractABM,
     for _ in startTime(simulation) : dt(simulation) : finishTime(simulation)
         sim.parameters.verbose ? verboseStep(simulation) : nothing 
         step!(model, agent_step!, model_step!)
+        # model.time += dt(simulation)
         simulation.stepnumber += 1
         simulation.currstep += dt(simulation)
     end 
@@ -108,9 +111,6 @@ function run!(model::AbstractABM,
     nothing 
 end 
 
-"""
-Run a simulation using stepping functions
-"""
 function run!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
                 simulation::AbsFixedStepSim) 
@@ -120,6 +120,7 @@ function run!(model::AbstractABM,
     for _ in startTime(simulation) : dt(simulation) : finishTime(simulation)
         sim.parameters.verbose ? verboseStep(sim) : nothing 
         step!(model,pre_model_step!, agent_step!, post_model_step!)
+        # model.time += dt(simulation)
         simulation.stepnumber += 1
         simulation.currstep += dt(sim)
     end 

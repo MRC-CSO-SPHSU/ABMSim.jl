@@ -226,37 +226,13 @@ function step!(
 
 end # step! 
 
+# Other versions of the step! function
+#    model_step! is omitted 
+#    n(model,s)::Function 
+#    agent_step! function can be a dummystep 
+
 "ensure symmetry when initializing ABMs via their declaration"
 initial_connect!(abm2::T2,
                  abm1::T1,
                  pars) where {T1 <: AbstractABM,T2 <: AbstractABM} = initial_connect!(abm1,abm2,pars)
 
-
-#=
-
-"set a symbol property to a model without overwriting"
-function setproperty!(model::AbstractABM,property::Symbol,val)
-    if property in keys(model.properties)
-        error("$(property) is already available")
-    end 
-    model.properties[property] = val  
-end 
-
-
-"A dummy connection between arbitrary ABMs"
-dummyconnect(abm1::AbstractABM,
-             abm2::AbstractABM,
-             properties::Dict{Symbol}) = nothing
-
-
-It is thinkable to associate further attributes to ABMs s.a.
-
-variable(sabm::AbstractABM,var::Symbol) = sabm.variable[var]
-parameter(sabm::AbstractABM,par::Parameter) = sabm.parameter[par]
-data(sabm::AbstractABM,symbol::Symbol)  = sabm.data[symbol]
-... 
-function addData!(sabm,symbol,csvfile) end
-function addVariable!(sabm,symbol) end 
-function deleteVariable!(sabm,symbol) end
-
-=# 

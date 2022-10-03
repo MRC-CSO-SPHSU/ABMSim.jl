@@ -75,6 +75,8 @@ function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1)
 
     for _ in 1:n 
  
+        sim.parameters.verbose ? verboseStep(sim) : nothing 
+
         for k in 1:length(sim.pre_model_steps)
             sim.pre_model_steps[k](model,sim)
         end
@@ -91,6 +93,7 @@ function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1)
                         
     end # for _ 
 
+    nothing 
 end # step! 
 
 "Default instructions before stepping an abm"
@@ -104,67 +107,4 @@ function defaultpoststep!(abm::AbstracABM,sim::AbstractABMSimulation)
     sim.currstep   +=  dt(sim)
     nothing 
 end
-
-# Other versions of the step! function
-#    model_step! is omitted 
-#    n(model,s)::Function 
-#    agent_step! function can be a dummystep 
-
-#===
-Stepping and simulation run function 
-===# 
-
-function verboseStep(simulation_step::Rational,yearly=true) 
-    (year,month) = date2yearsmonths(simulation_step) 
-    yearly && month == 0 ? println("conducting simulation step year $(year)") : nothing 
-    yearly               ? nothing : println("conducting simulation step year $(year) month $(month+1)")
-end
-
-
-"Run a simulation of an ABM"
-run!(simulation::AbstractABMSimulation) = 
-                run!(simulation, 
-                     simulation.pre_model_steps,
-                     simulation.agent_steps,
-                     simulation.post_model_steps)
-
-
-"""
-Run a simulation using stepping functions
-    - agent_step_function()
-    - model_step_function
-"""
-function run!(simulation::AbstractSimulation,
-              pre_model_step!, 
-              agent_step!,
-              post_model_step!) 
-
-    Random.seed!(seed(simulation))
-
-    for simulation_step in range(startTime(simulation),finishTime(simulation),step=dt(simulation))
-        verbose ? verboseStep(simulation_step,yearly) : nothing 
-        step!(simulation,pre_model_step!,agent_step!,post_model_step!)
-    end 
-
-end 
- 
-"""
-Run a simulation using stepping functions
-    - agent_step_function()
-    - model_step_function
-"""
-function run!(simulation::AbstractSimulation,
-              pre_model_steps::Vector{Function}, 
-              agent_steps,
-              post_model_steps;
-              verbose::Bool=false,yearly=true) 
-
-    Random.seed!(seed(simulation))
-
-    for simulation_step in range(startTime(simulation),finishTime(simulation),step=dt(simulation))
-        verbose ? verboseStep(simulation_step,yearly) : nothing 
-        step!(simulation,pre_model_steps,agent_steps,post_model_steps)
-    end 
-
-end 
  
