@@ -6,7 +6,7 @@ using Random
 using Mixers 
 using Parameters 
 
-using SomeUtil:   date2yearsmonths 
+using MultiAgents.Util: date2YearsMonths 
 
 import MultiAgents: step!
 

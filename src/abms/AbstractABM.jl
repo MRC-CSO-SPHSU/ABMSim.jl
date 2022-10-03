@@ -4,7 +4,7 @@ Specification of an abstract ABM type as a supertype for all
     from Agents.jl
 """
 
-using SomeUtil: removefirst!
+using  MultiAgents.Util: removeFirst!
 
 export AbstractABM 
 export allagents, nagents
@@ -111,7 +111,7 @@ end
 move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 
 "remove an agent"
-kill_agent!(agent,model::AbstractABM) = removefirst!(model.agentsList,agent)
+kill_agent!(agent,model::AbstractABM) = removeFirst!(model.agentsList,agent)
 
 "symmety"
 kill_agent!(model::AbstractABM,agent) = kill_agent!(agent,model)
