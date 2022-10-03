@@ -8,7 +8,7 @@
 export AbstractMABM, MultiABM 
 export dummyinit
 
-abstract type AbstractMABM  end   # <: AbstractABM (to think about it)
+abstract type AbstractMABM  end   # <: AbstractABM 
 
 dummyinit(mabm::AbstractMABM) = nothing 
 
@@ -16,7 +16,8 @@ dummyinit(mabm::AbstractMABM) = nothing
 mutable struct MultiABM   <: AbstractMABM 
     abms::Array{AbstractABM,1} 
 
-    "Dictionary of model properties"
+    # parameters ?
+    # data ? 
     properties
 
     """
@@ -24,7 +25,7 @@ mutable struct MultiABM   <: AbstractMABM
         a list of elemantary ABMs together with
         MABM-level properties  
     """  
-    function MultiABM(properties = Dict{Symbol,Any}(); 
+    function MultiABM(properties = nothing; 
                     initialize::Function = dummyinit,  
                     declare::Function) 
         mabm = new(declare(properties),deepcopy(properties))
