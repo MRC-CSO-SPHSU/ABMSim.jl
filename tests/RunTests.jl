@@ -11,20 +11,20 @@ julia> include("RunTests.jl")
 using Test
 
 # agents 
+using MultiAgents.Util: date2YearsMonths
 using MultiAgents: AbstractXAgent 
 using MultiAgents: initMultiAgents, verifyAgentsJLContract, 
-                   getIDCOUNTER
+                   getIDCOUNTER, MAVERSION
 using MultiAgents: ABM
-using MultiAgents: add_agent!, kill_agent!, seed!, nagents, allagents
-using MultiAgents: errorstep, dummystep
-using MultiAgents: initDefaultProp!, defaultprestep!, defaultpoststep!,
-                    currstep, stepnumber, dt
-using MultiAgents: step!
+using MultiAgents: add_agent!, kill_agent!, seed!, nagents, allagents, time
+using MultiAgents: step!, errorstep, dummystep
+using MultiAgents: currstep, stepnumber, dt
                    
 
 @testset "MultiAgents Components Testing" begin
     
     initMultiAgents()
+    @assert MAVERSION == v"0.3"
 
     mutable struct Person <: AbstractXAgent 
         id::Int 
@@ -52,8 +52,13 @@ using MultiAgents: step!
     end 
 
     # a dummy ABM 
+    mutable struct PopVars 
+        stepnumber :: Int 
+        PopVars() = new(0)
+    end
 
-    population = ABM{Person}()
+    population = ABM{Person}(time = 1980 // 1, variables = PopVars())
+
     add_agent!(population,person1)
     add_agent!(population,person3)
     add_agent!(population,person2)
@@ -61,27 +66,25 @@ using MultiAgents: step!
     add_agent!(person5,population)
     add_agent!(person6,population) 
 
-    initDefaultProp!(population,dt=1//12,startTime=1900//1)
-
     @testset verbose=true "ABM functionalities validation" begin
 
         @test !verifyAgentsJLContract(population)
         kill_agent!(person2,population)
         @test verifyAgentsJLContract(population)
 
-        @test population.startTime == 1900
-
-        @test population[1] == person1
-
-        @test seed!(population,1) skip=true
+        @test time(population) == 1980 // 1 
+        @test population[1] == person1 
 
         kill_agent!(person2,population)
+        @test nagents(population) == 4
+
         @test_throws ArgumentError kill_agent!(person1,population)
         @test nagents(population) == 4
 
         add_agent!(person1,population) 
         @test nagents(population) == 5
-
+ 
+        @test seed!(population,1) skip=true
         @test move_agent!(person1,"The Highlands",population) skip=true
 
     end 
@@ -93,50 +96,67 @@ using MultiAgents: step!
 
         @test_throws ErrorException errorstep(population) 
 
-        defaultprestep!(population)
-        @test stepnumber(population) == 1 
-        
-        defaultpoststep!(population) == nothing
-        @test currstep(population) > 0
-
     end 
+
+    dt(population::ABM{Person}) = 1 // 12 
 
     age_step!(person::Person,model::ABM{Person}) = 
         person.age += dt(model)
     
+    function population_step!(population::ABM{Person}) 
+        population.time += dt(population)
+        population.variables.stepnumber += 1
+        nothing 
+    end
+
     function age_step!(population::ABM{Person})
+        
         agents = allagents(population) 
         for person in agents 
             age_step!(person,population)
         end
-        nothing 
+        population_step!(population)
+
     end 
 
-    function population_step!(population::ABM{Person})
-        population.currstep += dt(population)
-        population.stepnumber += 1
-        nothing 
-    end
-    
-    @testset verbose=true "self-defined stepping functions for ABMs" begin 
+    prestep!(pop::ABM{Person}) = pop.time += dt(pop)  
+    poststep!(pop::ABM{Person}) = pop.variables.stepnumber += 1
 
-        initDefaultProp!(population,dt=1//12,startTime=1900//1)
+    @testset verbose=true "self-defined stepping functions for ABMs" begin 
 
         age_step!(person1,population) 
         @test person1.age > 46 
 
         age_step!(population)
         @test person6.age == 29.5 
+        year,month = date2YearsMonths(time(population))
+        month += 1  # adjust 
+        @test month == 2
+        @test population.variables.stepnumber == 1 
 
         step!(population,age_step!,12) 
         @test person1.age > 47 && person6.age > 30
-
-        step!(population,age_step!,population_step!,12)
+        year,month = date2YearsMonths(time(population))
+        month += 1  # adjust 
+        @test month == 2
+        @test year == 1980 
+        @test population.variables.stepnumber == 1 
+        
+        step!(population,age_step!,population_step!,n=12)
         @test person1.age > 48 && person6.age > 31
+        year,month = date2YearsMonths(time(population))
+        month += 1  # adjust 
+        @test month == 2
+        @test year == 1981 
+        @test population.variables.stepnumber == 13 
 
-        step!(population,defaultprestep!,age_step!,defaultpoststep!,12)
+        step!(population,dummystep,age_step!,dummystep,n=12)
         @test person1.age > 49 && person6.age > 32
-        @test population.currstep == 1902 &&  population.stepnumber == 24 
+        year,month = date2YearsMonths(time(population))
+        month += 1  # adjust 
+        @test month == 2
+        @test year == 1981 
+        @test population.variables.stepnumber == 13 
         
     end 
     
