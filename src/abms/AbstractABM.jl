@@ -7,7 +7,7 @@ Specification of an abstract ABM type as a supertype for all
 using  MultiAgents.Util: removeFirst!
 
 export AbstractABM 
-export allagents, nagents
+export allagents, nagents, time
 export add_agent!, move_agent!, kill_agent!
 export step!, dummystep, errorstep
 export verifyAgentsJLContract
@@ -22,7 +22,6 @@ abstract type AbstractABM end
 "An AbstractABM subtype to have a list of agents"
 allagents(model::AbstractABM) = model.agentsList
 
-"verify that basic elements "
 function verifyAgentsJLContract(model::AbstractABM)
     #= all ids are unique =# 
     agents = allagents(model)
@@ -30,6 +29,7 @@ function verifyAgentsJLContract(model::AbstractABM)
     length(ids) == length(Set(ids))
 end
 
+time(model::AbstractABM) = model.time
 
 # The following part is to be seperated in an another file, to be excluded
 # when agents.jl is used 
@@ -37,7 +37,7 @@ end
 Fields of an ABM
 =########################################
 
-
+#=
 "get a symbol property from a model"
 Base.getproperty(model::AbstractABM,property::Symbol) = 
     property ∈ fieldnames(typeof(model)) ?
@@ -49,9 +49,10 @@ Base.setproperty!(model::AbstractABM,property::Symbol,val) =
     property ∈ fieldnames(typeof(model)) ?
         Base.setfield!(model,property,val) : 
         model.properties[property] = val
-
+=#
 
 # equivalent to operator [], i.e. model[id] 
+# Agents.jl is better since there is a hash linked list
 "@return the id-th agent (Agents.jl)"
 function Base.getindex(model::AbstractABM,id::Int64) 
     agents = allagents(model) 
@@ -176,7 +177,7 @@ function step!(
     agents_first::Bool=true 
 )  
     
-    for i in range(1,n)
+    for _ in 1:n 
         
         if agents_first 
             for agent in model.agentsList
@@ -208,11 +209,11 @@ function step!(
     model::AbstractABM,
     pre_model_step!, 
     agent_step!,
-    post_model_step!,  
+    post_model_step!;  
     n::Int=1,
 )  
     
-    for i in range(1,n)
+    for _ in 1:n
         
         pre_model_step!(model)
     
