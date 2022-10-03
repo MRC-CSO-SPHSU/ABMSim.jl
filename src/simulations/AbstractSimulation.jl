@@ -1,5 +1,5 @@
 """
-Main specification of a Simulation type 
+Main specification of a Simulation type. 
 """
 
 using Random
@@ -11,7 +11,8 @@ using MultiAgents.Util: date2YearsMonths
 import MultiAgents: step!
 
 export dt, startTime, finishTime, seed, verbose, yearly 
-export stepnumber, 
+export stepnumber, currstep
+
 export initDefaultSimPars!, initDefaultFixedStepSimPars!
 export AbstractSimulation, AbsFixedStepSim, DefaultSimulation
 
@@ -27,19 +28,20 @@ verbose(sim::AbstractSimulation)    = sim.parameters.verbose
 #example(sim::AbstractSimulation)    = sim.example 
 #time(sim::AbstractSimulation)       = sim.time  
 
-@mix @with_kw struct BasicSimPars 
+@mix @with_kw struct BasicPars 
     seed :: Int       = 0
     startTime :: Int  = 0
     finishTime :: Int = 0 
-    verbose :: False  = false
+    verbose :: Bool   = false
 #    sleeptime :: Float64 = 0.0
 end # BasicPars 
 
-@BasicSimPars mutable struct SimPars end 
+@BasicPars mutable struct SimPars end 
 
 "Initialize default properties"
 function initDefaultSimPars!(sim::AbstractSimulation;
-                                startTime,finishTime,seed=0,verbose=false) 
+                                startTime, finishTime,
+                                seed=0, verbose=false) 
     sim.parameters.seed       = seed 
     sim.parameters.startTime  = startTime
     sim.parameters.finishTime = finishTime
@@ -54,17 +56,18 @@ abstract type AbsFixedStepSim <: AbstractSimulation end
 dt(sim::AbsFixedStepSim)            = sim.parameters.dt 
 yearly(sim::AbsFixedStepSim)        = sim.parameters.yearly
 stepnumber(sim::AbsFixedStepSim)    = sim.stepnumber
+currstep(sim::AbsFixedStepSim)      = sim.currstep
 
-@mix @with_kw struct FixedPars 
+@mix @with_kw struct FixedStepPars 
     dt :: Rational{Int}     = 0 // 1  
     yearly :: Bool          = false   # doing some extra stuffs at the begining of every year
 end 
 
-@BasicPars @FixedPars mutable struct FixedStepSimPars end
+@BasicPars @FixedStepPars mutable struct FixedStepSimPars end
 
-function initDefaultFixedStepSimPars!(sim::AbsFixedStepSim;dt,
-                                      startTime,finishTime,seed=0,
-                                      verbose=false,yearly=false) 
+function initDefaultFixedStepSimPars!(sim::AbsFixedStepSim;
+                                        dt, startTime, finishTime,
+                                        seed=0, verbose=false, yearly=false) 
 
     initDefaultSimPars!(sim;startTime=startTime,finishTime=finishTime,
                             seed=seed,verbose=verbose)

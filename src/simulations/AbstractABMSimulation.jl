@@ -70,7 +70,6 @@ Step an ABM given a set of independent stepping functions
     model_step[:](modelObj::AgentBasedModel,simObj::SimulationType)
     n::number of steps 
 """
-"step a simulation"
 function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1) 
 
     for _ in 1:n 
@@ -103,7 +102,7 @@ function defaultprestep!(abm::AbstractABM,sim::AbstractABMSimulation)
 end
 
 "Default instructions after stepping an abm"
-function defaultpoststep!(abm::AbstracABM,sim::AbstractABMSimulation)  
+function defaultpoststep!(abm::AbstractABM,sim::AbstractABMSimulation)  
     sim.currstep   +=  dt(sim)
     nothing 
 end
