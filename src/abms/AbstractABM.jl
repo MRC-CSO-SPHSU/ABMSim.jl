@@ -171,7 +171,7 @@ Stepping function for a model of type AgentBasedModel with
 function step!(
     model::AbstractABM, 
     agent_step!,
-    model_step!,  
+    model_step!;  
     n::Int=1,
     agents_first::Bool=true 
 )  
