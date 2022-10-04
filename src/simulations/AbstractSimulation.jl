@@ -8,13 +8,13 @@ using Parameters
 
 using MultiAgents.Util: date2YearsMonths 
 
-import MultiAgents: step!
+import MultiAgents: step!, run!
 
 export dt, startTime, finishTime, seed, verbose, yearly 
 export stepnumber, currstep
 
-export initDefaultSimPars!, initDefaultFixedStepSimPars!
-export AbstractSimulation, AbsFixedStepSim, DefaultSimulation
+export AbstractSimulation, AbsFixedStepSim, FixedStepSim
+export initFixedStepSim!
 
 abstract type AbstractSimulation end 
 
@@ -39,7 +39,7 @@ end # BasicPars
 @BasicPars mutable struct SimPars end 
 
 "Initialize default properties"
-function initDefaultSimPars!(sim::AbstractSimulation;
+function initSimPars!(sim::AbstractSimulation;
                                 startTime, finishTime,
                                 seed=0, verbose=false) 
     sim.parameters.seed       = seed 
@@ -56,7 +56,8 @@ abstract type AbsFixedStepSim <: AbstractSimulation end
 dt(sim::AbsFixedStepSim)            = sim.parameters.dt 
 yearly(sim::AbsFixedStepSim)        = sim.parameters.yearly
 stepnumber(sim::AbsFixedStepSim)    = sim.stepnumber
-currstep(sim::AbsFixedStepSim)      = sim.currstep
+currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) + 
+                                        Rational{Int}(startTime(sim))
 
 @mix @with_kw struct FixedStepPars 
     dt :: Rational{Int}     = 0 // 1  
@@ -65,28 +66,58 @@ end
 
 @BasicPars @FixedStepPars mutable struct FixedStepSimPars end
 
-function initDefaultFixedStepSimPars!(sim::AbsFixedStepSim;
+
+function initFixedStepSim!(sim::AbsFixedStepSim;
                                         dt, startTime, finishTime,
                                         seed=0, verbose=false, yearly=false) 
 
-    initDefaultSimPars!(sim;startTime=startTime,finishTime=finishTime,
-                            seed=seed,verbose=verbose)
+    initSimPars!(sim;startTime=startTime, finishTime=finishTime,
+                            seed=seed, verbose=verbose)
 
-    sim.parameters.dt   = dt
-    sim.currstep        = Rational{Int}(startTime) 
-    sim.stepnumber      = 0
-    sim.yearly          = verbose 
+    sim.parameters.dt       = dt
+    sim.parameters.yearly   = yearly
+    # sim.currstep            = Rational{Int}(startTime) 
+    sim.stepnumber          = 0
 
     nothing 
 end 
 
-function verboseStep(sim::AbsFixedStepSim) 
+mutable struct FixedStepSim <: AbsFixedStepSim
+    parameters::FixedStepSimPars 
+    # currstep::Rational{Int} # this is excessive 
+    stepnumber::Int 
 
-    (year,month) = date2yearsmonths(sim.currstep) 
-    yearly && month == 0 ? println("conducting simulation step year $(year)") : nothing 
-    yearly               ? nothing : println("conducting simulation step year $(year) month $(month+1)")
-                                     println("=========================================================")
+    FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) = 
+        new( FixedStepSimPars( dt=dt, 
+                startTime=startTime, finishTime=finishTime,
+                seed=seed, verbose = verbose, yearly = yearly ), 0) 
+end
+
+
+function verboseStep(sim::AbsFixedStepSim) 
+    (year,month) = date2YearsMonths(currstep(sim)) 
+    iteryear = "########################################"
+    yearly(sim) && month == 0   ? 
+        println("conducting simulation step year $(year) \n$(iteryear)") : nothing 
+    itermonth = "========================================================="
+    yearly(sim) ? 
+        nothing : 
+        println("conducting simulation step year $(year) month $(month+1) \n$(itermonth)")
+                  
     nothing 
+end
+
+
+function step!(model::AbstractABM,
+                agent_step!,
+                model_step!,
+                sim::AbsFixedStepSim) 
+    
+    sim.parameters.verbose ? verboseStep(sim) : nothing 
+    step!(model, agent_step!, model_step!)
+    model.time += dt(sim)
+    sim.stepnumber += 1
+    # sim.currstep += dt(sim)
 end
 
 """
@@ -103,29 +134,34 @@ function run!(model::AbstractABM,
 
     Random.seed!(seed(simulation))
 
-    for _ in startTime(simulation) : dt(simulation) : finishTime(simulation)
-        sim.parameters.verbose ? verboseStep(simulation) : nothing 
-        step!(model, agent_step!, model_step!)
-        # model.time += dt(simulation)
-        simulation.stepnumber += 1
-        simulation.currstep += dt(simulation)
+    for _ in currstep(simulation) : dt(simulation) : finishTime(simulation)
+        step!(model,agent_step!,model_step!,simulation)
     end 
 
     nothing 
 end 
 
+function step!(model::AbstractABM,
+                pre_model_step!, agent_step!, post_model_step!,
+                sim::AbsFixedStepSim) 
+
+    sim.parameters.verbose ? verboseStep(sim) : nothing 
+    step!(model, pre_model_step!, agent_step!, post_model_step!)
+    model.time += dt(sim)
+    sim.stepnumber += 1
+    # sim.currstep += dt(sim)
+
+end
+
+
 function run!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
-                simulation::AbsFixedStepSim) 
+                sim::AbsFixedStepSim) 
 
-    Random.seed!(seed(simulation))
+    Random.seed!(seed(sim))
 
-    for _ in startTime(simulation) : dt(simulation) : finishTime(simulation)
-        sim.parameters.verbose ? verboseStep(sim) : nothing 
-        step!(model,pre_model_step!, agent_step!, post_model_step!)
-        # model.time += dt(simulation)
-        simulation.stepnumber += 1
-        simulation.currstep += dt(sim)
+    for _ in currstep(sim) : dt(sim) : finishTime(sim)
+        step!(model,pre_model_step!, agent_step!, post_model_step!,sim)
     end 
 
     nothing 

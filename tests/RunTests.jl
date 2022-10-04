@@ -18,8 +18,9 @@ using MultiAgents: initMultiAgents, verifyAgentsJLContract,
 using MultiAgents: ABM
 using MultiAgents: add_agent!, kill_agent!, seed!, nagents, allagents, time
 using MultiAgents: step!, errorstep, dummystep
-using MultiAgents: currstep, stepnumber, dt
-                   
+using MultiAgents: currstep, stepnumber, dt, startTime, finishTime
+using MultiAgents: FixedStepSim, initFixedStepSim!             
+using MultiAgents: run!    
 
 @testset "MultiAgents Components Testing" begin
     
@@ -98,13 +99,13 @@ using MultiAgents: currstep, stepnumber, dt
 
     end 
 
-    dt(population::ABM{Person}) = 1 // 12 
+    stepsize(population::ABM{Person}) = 1 // 12 
 
     age_step!(person::Person,model::ABM{Person}) = 
-        person.age += dt(model)
+        person.age += stepsize(model)
     
     function population_step!(population::ABM{Person}) 
-        population.time += dt(population)
+        population.time += stepsize(population)
         population.variables.stepnumber += 1
         nothing 
     end
@@ -119,7 +120,7 @@ using MultiAgents: currstep, stepnumber, dt
 
     end 
 
-    prestep!(pop::ABM{Person}) = pop.time += dt(pop)  
+    prestep!(pop::ABM{Person}) = pop.time += stepsize(pop)  
     poststep!(pop::ABM{Person}) = pop.variables.stepnumber += 1
 
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
@@ -159,6 +160,52 @@ using MultiAgents: currstep, stepnumber, dt
         @test population.variables.stepnumber == 13 
         
     end 
+
+    pop = ABM{Person}(time = 1980 // 1)
+    add_agent!(pop,person1)
+    add_agent!(pop,person3)
+    add_agent!(pop,person4)
+    add_agent!(person5,pop)
+    add_agent!(person6,pop) 
+
+    simulator = FixedStepSim(dt=1//12,startTime=1980,finishTime=1990,
+                                verbose=true,yearly=true)
+    
+    @testset verbose=true "Executing ABM with a simple simulation type" begin 
+
+        @test currstep(simulator) == 1980 // 1 
+        @test dt(simulator) == 1 // 12 
+        @test stepnumber(simulator) == 0 
+        @test time(pop) == 1980 // 1 
+
+        step!(pop,age_step!,dummystep,simulator)
+
+        @test time(pop) > 1980 
+        @test currstep(simulator) == time(pop) 
+        @test stepnumber(simulator) == 1 
+
+        run!(pop,age_step!,dummystep,simulator)
+
+        @test time(pop) == 1990 + dt(simulator)
+        @test currstep(simulator) == time(pop) 
+        @test stepnumber(simulator) == 121
+
+        initFixedStepSim!(simulator, dt=dt(simulator), 
+                                        startTime = 1990,
+                                        finishTime = 2000) 
+        pop.time = currstep(simulator)
+
+        @test currstep(simulator) == 1990 
+        @test dt(simulator) == 1 // 12 
+        @test stepnumber(simulator) == 0 
+        @test time(pop) == 1990  
+                                
+        run!(pop,dummystep,age_step!,dummystep,simulator) 
+
+        @test time(pop) == finishTime(simulator) + dt(simulator)
+        @test currstep(simulator) == time(pop) 
+        @test stepnumber(simulator) == 121
+    end
     
 
 end  # testset MultiAgents components 

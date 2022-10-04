@@ -96,13 +96,13 @@ function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1)
 end # step! 
 
 "Default instructions before stepping an abm"
-function defaultprestep!(abm::AbstractABM,sim::AbstractABMSimulation)  
+function defaultpoststep!(abm::AbstractABM,sim::AbstractABMSimulation)  
     sim.stepnumber += 1 
     nothing 
 end
 
 "Default instructions after stepping an abm"
-function defaultpoststep!(abm::AbstractABM,sim::AbstractABMSimulation)  
+function defaultprestep!(abm::AbstractABM,sim::AbstractABMSimulation)  
     sim.currstep   +=  dt(sim)
     nothing 
 end
