@@ -118,6 +118,7 @@ function step!(model::AbstractABM,
     model.time += dt(sim)
     sim.stepnumber += 1
     # sim.currstep += dt(sim)
+    nothing 
 end
 
 """
@@ -131,6 +132,10 @@ function run!(model::AbstractABM,
               agent_step!,
               model_step!,
               simulation::AbsFixedStepSim) 
+
+    model.time != currstep(simulation) ? 
+        throw(ArgumentError("$(model.time) is not initially equal to simulation currentstep $(currstep(simulation))")) : 
+        nothing 
 
     Random.seed!(seed(simulation))
 
@@ -150,7 +155,7 @@ function step!(model::AbstractABM,
     model.time += dt(sim)
     sim.stepnumber += 1
     # sim.currstep += dt(sim)
-
+    nothing 
 end
 
 
@@ -158,6 +163,10 @@ function run!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
                 sim::AbsFixedStepSim) 
 
+    model.time != currstep(sim) ? 
+        throw(ArgumentError("$(model.time) is not initially equal to simulation currentstep $(currstep(sim))")) : 
+        nothing 
+        
     Random.seed!(seed(sim))
 
     for _ in currstep(sim) : dt(sim) : finishTime(sim)

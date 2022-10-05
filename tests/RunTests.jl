@@ -190,9 +190,15 @@ using MultiAgents: run!
         @test currstep(simulator) == time(pop) 
         @test stepnumber(simulator) == 121
 
-        initFixedStepSim!(simulator, dt=dt(simulator), 
+        initFixedStepSim!(simulator, dt= 1 // 12, 
                                         startTime = 1990,
                                         finishTime = 2000) 
+
+        # println(pop.time) 
+        # println(currstep(simulator))
+
+        @test_throws ArgumentError run!(pop,dummystep,age_step!,dummystep,simulator) 
+
         pop.time = currstep(simulator)
 
         @test currstep(simulator) == 1990 
