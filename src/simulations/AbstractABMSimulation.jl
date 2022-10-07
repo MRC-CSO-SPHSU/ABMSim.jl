@@ -63,6 +63,18 @@ function attach_post_model_step!(simulation::AbstractABMSimulation,
     nothing
 end 
 
+"Default instructions before stepping an abm"
+function defaultpoststep!(::AbstractABM,sim::AbstractABMSimulation)  
+    sim.stepnumber += 1 
+    nothing 
+end
+
+"Default instructions after stepping an abm"
+function defaultprestep!(abm::AbstractABM,sim::AbstractABMSimulation)  
+    abm.t   +=  dt(sim)
+    nothing 
+end
+
 """
 Step an ABM given a set of independent stepping functions
     pre_model_steps[:](modelObj::AgentBasedModel,simObj::SimulationType)
@@ -81,12 +93,12 @@ function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1)
         end
  
         for agent in allagents(model)
-            for k in 1:length(agent_steps)
+            for k in 1:length(sim.agent_steps)
                 sim.agent_steps[k](agent,model,sim)
             end 
         end
                                 
-        for k in 1:length(post_model_steps)
+        for k in 1:length(sim.post_model_steps)
             sim.post_model_steps[k](model,sim)
         end
                         
@@ -95,15 +107,19 @@ function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1)
     nothing 
 end # step! 
 
-"Default instructions before stepping an abm"
-function defaultpoststep!(abm::AbstractABM,sim::AbstractABMSimulation)  
-    sim.stepnumber += 1 
-    nothing 
-end
 
-"Default instructions after stepping an abm"
-function defaultprestep!(abm::AbstractABM,sim::AbstractABMSimulation)  
-    sim.currstep   +=  dt(sim)
-    nothing 
-end
  
+function run!(model::AbstractABM, sim::AbstractABMSimulation) 
+
+    time(model) != currstep(sim) ? 
+        throw(ArgumentError("$(time(model)) is not equal to simulation currentstep $(currstep(sim))")) : 
+        nothing 
+
+    seed!(sim)
+
+    for _ in currstep(sim) : dt(sim) : finishTime(sim)
+        step!(model,sim)
+    end 
+
+    nothing 
+end 

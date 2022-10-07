@@ -5,6 +5,7 @@ Specification of an abstract ABM type as a supertype for all
 """
 
 using  MultiAgents.Util: removeFirst!
+import Base.time 
 
 export AbstractABM 
 export allagents, nagents, time
@@ -29,7 +30,7 @@ function verifyAgentsJLContract(model::AbstractABM)
     length(ids) == length(Set(ids))
 end
 
-time(model::AbstractABM) = model.time
+time(model::AbstractABM) = model.t
 
 # The following part is to be seperated in an another file, to be excluded
 # when agents.jl is used 
