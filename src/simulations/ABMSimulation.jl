@@ -5,23 +5,32 @@ Definition of an ABM-Simulation type.
 export ABMSimulation 
 
 using MultiAgents: defaultpoststep!, defaultprestep! 
-using MultiAgents.Util: AbstractExample, DummyExample 
+using MultiAgents.Util: AbstractExample, DefaultExample
 
 mutable struct ABMSimulation <: AbstractABMSimulation  
-    parameters 
+    parameters::FixedStepSimPars 
     
     pre_model_steps::Vector{Function} 
     agent_steps::Vector{Function}       
     post_model_steps::Vector{Function} 
 
     # example 
-    # time :: Rational{Int}
+    stepnumber::Int 
 
     function ABMSimulation(pars;
-                           example::AbstractExample=DummyExample()) 
-        abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],example)
+                           example=DefaultExample()) 
+        abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
         setup!(abmsimulation,example)
         abmsimulation 
     end
+
+    ABMSimulation(;dt, startTime, finishTime, 
+        example=DefaultExample(),
+        seed=0,verbose=false,yearly=false) = 
+            ABMSimulation(FixedStepSimPars( dt=dt, 
+                                            startTime = startTime, finishTime = finishTime,
+                                            seed = seed, verbose = verbose, yearly = yearly), 
+                            example = example) 
+    
 end 
 
