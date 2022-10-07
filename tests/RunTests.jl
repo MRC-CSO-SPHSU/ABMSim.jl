@@ -11,7 +11,7 @@ julia> include("RunTests.jl")
 using Test
 
 # agents 
-using MultiAgents.Util: date2YearsMonths
+using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
 using MultiAgents: AbstractXAgent 
 using MultiAgents: initMultiAgents, verifyAgentsJLContract, 
                    getIDCOUNTER, MAVERSION
@@ -21,26 +21,32 @@ using MultiAgents: step!, errorstep, dummystep
 using MultiAgents: currstep, stepnumber, dt, startTime, finishTime
 using MultiAgents: FixedStepSim, initFixedStepSim!             
 using MultiAgents: run!    
+using MultiAgents: ABMSimulation
+using MultiAgents: attach_agent_step!
+import MultiAgents: setup!
+
+
+initMultiAgents()
+@assert MAVERSION == v"0.3"
+
 
 @testset "MultiAgents Components Testing" begin
     
-    initMultiAgents()
-    @assert MAVERSION == v"0.3"
-
     mutable struct Person <: AbstractXAgent 
         id::Int 
         pos 
-        age::Rational{Int} 
-        Person(position,a) = new(getIDCOUNTER(),position,a)
+        age::Rational{Int}
+        income::Float64  
+        Person(position,a) = new(getIDCOUNTER(),position,a,10000.0)
     end 
-
+    
     # List of persons 
     person1 = Person("Edinbrugh",46//1) 
     person2 = person1               
     person3 = Person("Abderdeen",25 + 3 // 12) 
     person4 = Person("Edinbrugh", 26 // 1) 
     person5 = Person("Glasgow", 25 // 1)
-    person6 = Person("Edinbrugh", 29 + 5 // 12) 
+    person6 = Person("Edinbrugh", 29 + 5 // 12)  
 
     @testset verbose=true "AbstractAgent verification" begin
 
@@ -58,7 +64,7 @@ using MultiAgents: run!
         PopVars() = new(0)
     end
 
-    population = ABM{Person}(time = 1980 // 1, variables = PopVars())
+    population = ABM{Person}(t = 1980 // 1, variables = PopVars())
 
     add_agent!(population,person1)
     add_agent!(population,person3)
@@ -105,7 +111,7 @@ using MultiAgents: run!
         person.age += stepsize(model)
     
     function population_step!(population::ABM{Person}) 
-        population.time += stepsize(population)
+        population.t += stepsize(population)
         population.variables.stepnumber += 1
         nothing 
     end
@@ -120,7 +126,7 @@ using MultiAgents: run!
 
     end 
 
-    prestep!(pop::ABM{Person}) = pop.time += stepsize(pop)  
+    prestep!(pop::ABM{Person}) = pop.t += stepsize(pop)  
     poststep!(pop::ABM{Person}) = pop.variables.stepnumber += 1
 
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
@@ -161,14 +167,14 @@ using MultiAgents: run!
         
     end 
 
-    pop = ABM{Person}(time = 1980 // 1)
+    pop = ABM{Person}(t = 1980 // 1)
     add_agent!(pop,person1)
     add_agent!(pop,person3)
     add_agent!(pop,person4)
     add_agent!(person5,pop)
     add_agent!(person6,pop) 
 
-    simulator = FixedStepSim(dt=1//12,startTime=1980,finishTime=1990,
+    simulator = FixedStepSim(dt=1//12,startTime=time(pop),finishTime=1990,
                                 verbose=true,yearly=true)
     
     @testset verbose=true "Executing ABM with a simple simulation type" begin 
@@ -199,7 +205,7 @@ using MultiAgents: run!
 
         @test_throws ArgumentError run!(pop,dummystep,age_step!,dummystep,simulator) 
 
-        pop.time = currstep(simulator)
+        pop.t = currstep(simulator)
 
         @test currstep(simulator) == 1990 
         @test dt(simulator) == 1 // 12 
@@ -212,7 +218,34 @@ using MultiAgents: run!
         @test currstep(simulator) == time(pop) 
         @test stepnumber(simulator) == 121
     end
-    
+
+    struct IncomePars
+        changeModifier::Float64
+    end 
+
+    mutable struct IncomeVar 
+        averageIncome::Float64 
+    end 
+
+    popWincome = ABM{Person}(t = 1980 // 1,
+                        parameters = IncomePars(0.1), 
+                        variables = IncomeVar(person1.income))    
+
+    incomeChange!(person::Person,pop::ABM{Person}) =  
+        person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier
+                
+    @testset verbose=true "Executing ABM with an ABM Simulation type" begin 
+
+        abmsim = ABMSimulation( dt=1//12,
+                    startTime=time(popWincome), finishTime=1990,
+                    verbose=true, yearly=true) 
+
+        run!(popWincome,abmsim)
+
+        println(popWincome) 
+
+        
+    end
 
 end  # testset MultiAgents components 
 
