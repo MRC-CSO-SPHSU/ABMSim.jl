@@ -2,15 +2,18 @@
 Main specification of a Simulation type. 
 """
 
-using Random
+using Random 
+import Random.seed! 
+export seed!
+
 using Mixers 
 using Parameters 
 
 using MultiAgents.Util: date2YearsMonths 
 
-import MultiAgents: step!, run!
+import MultiAgents: step!
 
-export dt, startTime, finishTime, seed, verbose, yearly 
+export dt, startTime, finishTime, seed, verbose, yearly
 export stepnumber, currstep
 
 export AbstractSimulation, AbsFixedStepSim, FixedStepSim
@@ -21,12 +24,15 @@ abstract type AbstractSimulation end
 startTime(sim::AbstractSimulation)  = sim.parameters.startTime
 finishTime(sim::AbstractSimulation) = sim.parameters.finishTime
 seed(sim::AbstractSimulation)       = sim.parameters.seed
+seed!(sim::AbstractSimulation)      = seed(sim) == 0 ?  Random.seed!(floor(Int, time())) : Random.seed!(seed)  
 verbose(sim::AbstractSimulation)    = sim.parameters.verbose 
+
+
 # sleeptime(sim::AbstractSimulation)  = sim.parameters.sleeptime
 
 # The following could be employed (undecided)
 #example(sim::AbstractSimulation)    = sim.example 
-#time(sim::AbstractSimulation)       = sim.time  
+# time(sim::AbstractSimulation)       = sim.time  
 
 @mix @with_kw struct BasicPars 
     seed :: Int       = 0
@@ -42,12 +48,13 @@ end # BasicPars
 function initSimPars!(sim::AbstractSimulation;
                                 startTime, finishTime,
                                 seed=0, verbose=false) 
+
     sim.parameters.seed       = seed 
     sim.parameters.startTime  = startTime
     sim.parameters.finishTime = finishTime
     sim.parameters.verbose    = verbose 
     # sim.time = Rational{Int}(startTime)
-    
+
     nothing  
 end 
 
@@ -84,15 +91,15 @@ end
 
 mutable struct FixedStepSim <: AbsFixedStepSim
     parameters::FixedStepSimPars 
-    # currstep::Rational{Int} # this is excessive 
     stepnumber::Int 
 
     FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) = 
         new( FixedStepSimPars( dt=dt, 
-                startTime=startTime, finishTime=finishTime,
-                seed=seed, verbose = verbose, yearly = yearly ), 0) 
+                startTime = startTime, finishTime = finishTime,
+                seed = seed , verbose = verbose, yearly = yearly ), 0) 
+    
+    FixedStepSim() = new(FixedStepSimPars(),0)
 end
-
 
 function verboseStep(sim::AbsFixedStepSim) 
     (year,month) = date2YearsMonths(currstep(sim)) 
@@ -107,6 +114,18 @@ function verboseStep(sim::AbsFixedStepSim)
     nothing 
 end
 
+function verboseStep(var,msg::String,sim::AbsFixedStepSim)
+    if verbose(sim) 
+        if yearly(sim) 
+            curryear,currmonth = date2YearsMonths(currstep(sim)) 
+            currmonth == 0 ? println("$msg : $var") : nothing 
+        else 
+            println("$msg : $var")
+        end 
+    end
+    nothing 
+end
+
 
 function step!(model::AbstractABM,
                 agent_step!,
@@ -115,7 +134,7 @@ function step!(model::AbstractABM,
     
     sim.parameters.verbose ? verboseStep(sim) : nothing 
     step!(model, agent_step!, model_step!)
-    model.time += dt(sim)
+    model.t += dt(sim)
     sim.stepnumber += 1
     # sim.currstep += dt(sim)
     nothing 
@@ -133,11 +152,11 @@ function run!(model::AbstractABM,
               model_step!,
               simulation::AbsFixedStepSim) 
 
-    model.time != currstep(simulation) ? 
-        throw(ArgumentError("$(model.time) is not initially equal to simulation currentstep $(currstep(simulation))")) : 
+    time(model) != currstep(simulation) ? 
+        throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(simulation))")) : 
         nothing 
 
-    Random.seed!(seed(simulation))
+    seed!(simulation)
 
     for _ in currstep(simulation) : dt(simulation) : finishTime(simulation)
         step!(model,agent_step!,model_step!,simulation)
@@ -152,7 +171,7 @@ function step!(model::AbstractABM,
 
     sim.parameters.verbose ? verboseStep(sim) : nothing 
     step!(model, pre_model_step!, agent_step!, post_model_step!)
-    model.time += dt(sim)
+    model.t += dt(sim)
     sim.stepnumber += 1
     # sim.currstep += dt(sim)
     nothing 
@@ -163,11 +182,11 @@ function run!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
                 sim::AbsFixedStepSim) 
 
-    model.time != currstep(sim) ? 
-        throw(ArgumentError("$(model.time) is not initially equal to simulation currentstep $(currstep(sim))")) : 
+    time(model) != currstep(sim) ? 
+        throw(ArgumentError("$(time(model)) is not equal to simulation currentstep $(currstep(sim))")) : 
         nothing 
-        
-    Random.seed!(seed(sim))
+    
+    seed!(sim)
 
     for _ in currstep(sim) : dt(sim) : finishTime(sim)
         step!(model,pre_model_step!, agent_step!, post_model_step!,sim)
