@@ -174,8 +174,9 @@ initMultiAgents()
     add_agent!(person5,pop)
     add_agent!(person6,pop) 
 
-    simulator = FixedStepSim(dt=1//12,startTime=time(pop),finishTime=1990,
-                                verbose=true,yearly=true)
+    simulator = FixedStepSim(dt=1//12,
+                                startTime=time(pop),finishTime=1990,
+                                verbose=false)
     
     @testset verbose=true "Executing ABM with a simple simulation type" begin 
 
@@ -231,20 +232,45 @@ initMultiAgents()
                         parameters = IncomePars(0.1), 
                         variables = IncomeVar(person1.income))    
 
-    incomeChange!(person::Person,pop::ABM{Person}) =  
+    incomeChange!(person::Person,pop::ABM{Person},::ABMSimulation) =  
         person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier
+    
+    age_step!(person::Person,pop::ABM{Person},sim::ABMSimulation) = 
+        person.age += dt(sim)
                 
     @testset verbose=true "Executing ABM with an ABM Simulation type" begin 
 
+        @test_throws Exception  abmsim = 
+                ABMSimulation( dt=1//12,
+                                startTime=time(popWincome), finishTime=1990,
+                                verbose=false, yearly=true) 
+
         abmsim = ABMSimulation( dt=1//12,
-                    startTime=time(popWincome), finishTime=1990,
-                    verbose=true, yearly=true) 
+                                startTime=time(popWincome), finishTime=1990,
+                                verbose=false, yearly=true, 
+                                setupEnabled = false) 
+
+        @test currstep(abmsim) == 1980 // 1 
+        @test dt(abmsim) == 1 // 12 
+        @test stepnumber(abmsim) == 0 
+        @test time(popWincome) == 1980 // 1
+        
+        attach_agent_step!(abmsim,age_step!)
+        attach_agent_step!(abmsim,incomeChange!)
+
+        step!(popWincome,abmsim)
+
+        @test currstep(abmsim) > 1980 // 1 
+        @test stepnumber(abmsim) == 1 
+        @test time(popWincome) == currstep(abmsim) 
 
         run!(popWincome,abmsim)
-
-        println(popWincome) 
-
         
+        @test currstep(abmsim) == 1990 // 1 + 1 // 12
+        @test stepnumber(abmsim) == 121
+        @test time(popWincome) == currstep(abmsim) 
+
+        println(popWincome)
     end
 
 end  # testset MultiAgents components 
