@@ -84,5 +84,3 @@ run!(population,abmsim)
 println(population)
 
 println(abmsim.stepnumber)
-
-println(abmsim.parameters.seed)

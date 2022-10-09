@@ -22,13 +22,11 @@ using MultiAgents: currstep, stepnumber, dt, startTime, finishTime
 using MultiAgents: FixedStepSim, initFixedStepSim!             
 using MultiAgents: run!    
 using MultiAgents: ABMSimulation
-using MultiAgents: attach_agent_step!
+using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 import MultiAgents: setup!
-
 
 initMultiAgents()
 @assert MAVERSION == v"0.3"
-
 
 @testset "MultiAgents Components Testing" begin
     
@@ -229,15 +227,33 @@ initMultiAgents()
     end 
 
     popWincome = ABM{Person}(t = 1980 // 1,
-                        parameters = IncomePars(0.1), 
-                        variables = IncomeVar(person1.income))    
+                        parameters = IncomePars(0.01), 
+                        variables = IncomeVar(person1.income))
+                        
+    add_agent!(popWincome,person1)
+    add_agent!(popWincome,person3)
+    add_agent!(popWincome,person2)
+    add_agent!(popWincome,person4)
+    add_agent!(person5,popWincome)
+    add_agent!(person6,popWincome) 
 
     incomeChange!(person::Person,pop::ABM{Person},::ABMSimulation) =  
-        person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier
+        person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier * person.income
     
     age_step!(person::Person,pop::ABM{Person},sim::ABMSimulation) = 
         person.age += dt(sim)
-                
+
+    function incomeAvg!(pop::ABM{Person},sim::ABMSimulation) 
+        ret = 0
+        for person in allagents(pop)
+            ret += person.income 
+        end
+        pop.variables.averageIncome = ret / nagents(pop)
+        verboseStep(pop.variables.averageIncome,"average income",sim)  
+        nothing 
+    end 
+
+
     @testset verbose=true "Executing ABM with an ABM Simulation type" begin 
 
         @test_throws Exception  abmsim = 
@@ -254,9 +270,11 @@ initMultiAgents()
         @test dt(abmsim) == 1 // 12 
         @test stepnumber(abmsim) == 0 
         @test time(popWincome) == 1980 // 1
-        
+        @test nagents(popWincome) > 0 
+
         attach_agent_step!(abmsim,age_step!)
         attach_agent_step!(abmsim,incomeChange!)
+        attach_post_model_step!(abmsim,incomeAvg!)
 
         step!(popWincome,abmsim)
 
@@ -269,8 +287,8 @@ initMultiAgents()
         @test currstep(abmsim) == 1990 // 1 + 1 // 12
         @test stepnumber(abmsim) == 121
         @test time(popWincome) == currstep(abmsim) 
+        @test popWincome.variables.averageIncome != 10000.0
 
-        println(popWincome)
     end
 
 end  # testset MultiAgents components 
