@@ -58,7 +58,7 @@ mutable struct Stock <: AbstractXAgent
     function Stock(person::Person)
         pr = rand(10.0:100.0) 
         qu = trunc(Int, person.income / pr)    
-        new(getIDCOUNTER(),rand(1:7),qu,pr) 
+        new(person.id,rand(1:7),qu,pr) 
     end 
 end
 

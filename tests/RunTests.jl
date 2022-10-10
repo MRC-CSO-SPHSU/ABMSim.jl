@@ -277,7 +277,6 @@ include("./datatypes.jl")
     end
 
     # 
-   
 
     demography = Demography()
 
@@ -297,11 +296,41 @@ include("./datatypes.jl")
 
     end 
 
+    age_step!(person::Person,demography::Demography) = 
+        age_step!(person,demography.pop)
+    
+    incomeGain(person::Person,::Demography) = 
+        person.income += rand(1000.0,2000.0)
+
+    function stock_step!(demography::Demography) 
+
+        demography.pop.t += stepsize(demography.pop)
+
+        for share in allagents(demography.shares) 
+            share.price += rand(1:10) * share.pos / 100 * rand([-1 1])     
+        end 
+        demography.shares.t = time(demography.pop) 
+
+        nothing 
+    end
+    
+    # println(demography) 
+
     @testset verbose=true "Executing A MultiABM in an Agent.jl-way" begin 
 
-        
+        step!(demography,age_step!) 
+
+        @test demography[1].age > 46
+
+        pr = demography.shares[1].price 
+
+        step!(demography,age_step!,stock_step!)
+
+        @test demography.shares[1].price != pr
 
     end 
+
+    # println(demography)
 
 end  # testset MultiAgents components 
 
