@@ -24,12 +24,13 @@ abstract type AbstractABM end
 allagents(model::AbstractABM) = model.agentsList
 
 function verifyAgentsJLContract(model::AbstractABM)
-    # necessary field names 
     #= all ids are unique =# 
     agents = allagents(model)
     ids    = [ id for agent in agents for id = agent.id]
     length(ids) == length(Set(ids))
 end
+
+verifyMAJLContract(model::AbstractABM) = error("to implement")
 
 time(model::AbstractABM) = model.t
 
@@ -77,7 +78,7 @@ Functionalities for agents within an ABM
 seed!(model::AbstractABM,seed) = error("not implemented") 
 
 "numbe of  agents"
-nagents(model::AbstractABM) = length(model.agentsList)
+nagents(model::AbstractABM) = length(allagents(model))
  
 
 #= 

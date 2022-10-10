@@ -5,33 +5,12 @@
     This is intended to be just a demonstration of implementing a MABM. 
 """ 
 
-export AbstractMABM, MultiABM 
-export dummyinit
+export AbstractMABM
+import MultiAgents: allagents, getindex, nagents, add_agent!, move_agent!, kill_agent!
+export allagents, getindex, nagents, add_agent!, move_agent!, kill_agent!
+
 
 abstract type AbstractMABM  <: AbstractABM end   
-
-allabms(model::AbstractMABM)::Vector{AbstractABM} = error("not implemented")
-
-# an implementation: find out all fields of type AbstractABM and extract allagents 
-allagents(model::AbstractMABM)::Vector{AbstractAgent} = error("not implemented") 
-
-function verifyAgentsJLContract(model::AbstractMABM) 
-    for abm in allabms(model) 
-        if !verifyAgentsJLContract(abm) return false end 
-    end
-    true 
-end  
-
-Base.getindex(model::AbstractMABM,id::Int) = error("not implemented") 
-
-nagents(model::AbstractMABM) = error("not implemented") 
-
-add_agent!(agent, model::AbstractMABM) = error("meaningless") 
-
-move_agent!(agent,pos,model::AbstractMABM) = error("not implemented") 
-
-kill_agent!(agent,model::AbstractMABM) = error("not implemented") 
-
 
 
 #= 
@@ -56,3 +35,19 @@ mutable struct MultiABM   <: AbstractMABM
 
 end # MultiABM  
 =# 
+
+allabms(model::AbstractMABM)::Vector{AbstractABM} = error("ot implemented")
+
+# an implementation: find out all fields of type AbstractABM and extract allagents 
+allagents(model::AbstractMABM)::Vector{AbstractAgent} = error("not implemented") 
+
+function verifyAgentsJLContract(model::AbstractMABM) 
+    for abm in allabms(model) 
+        if !verifyAgentsJLContract(abm) return false end 
+    end
+    true 
+end  
+
+verifyMAJLContract(model::AbstractMABM) = error("to implement")
+
+move_agent!(agent,pos,model::AbstractMABM) = error("not implemented") 

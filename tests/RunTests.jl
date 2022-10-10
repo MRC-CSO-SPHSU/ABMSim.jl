@@ -16,7 +16,7 @@ using MultiAgents: AbstractXAgent
 using MultiAgents: initMultiAgents, verifyAgentsJLContract, 
                    getIDCOUNTER, MAVERSION
 using MultiAgents: ABM
-using MultiAgents: add_agent!, kill_agent!, seed!, nagents, allagents, time
+using MultiAgents: add_agent!, kill_agent!, seed!, nagents, time
 using MultiAgents: step!, errorstep, dummystep
 using MultiAgents: currstep, stepnumber, dt, startTime, finishTime
 using MultiAgents: FixedStepSim, initFixedStepSim!             
@@ -24,29 +24,22 @@ using MultiAgents: run!
 using MultiAgents: ABMSimulation
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 import MultiAgents: setup!
+using MultiAgents: AbstractMABM 
+import MultiAgents: allagents
 
 initMultiAgents()
 @assert MAVERSION == v"0.3"
 
+include("./datatypes.jl")
+
 @testset "MultiAgents Components Testing" begin
     
-    mutable struct Person <: AbstractXAgent 
-        id::Int 
-        pos 
-        age::Rational{Int}
-        income::Float64  
-        Person(position,a) = new(getIDCOUNTER(),position,a,10000.0)
-    end 
-    
-    # List of persons 
-    person1 = Person("Edinbrugh",46//1) 
-    person2 = person1               
-    person3 = Person("Abderdeen",25 + 3 // 12) 
-    person4 = Person("Edinbrugh", 26 // 1) 
-    person5 = Person("Glasgow", 25 // 1)
-    person6 = Person("Edinbrugh", 29 + 5 // 12)  
+
 
     @testset verbose=true "AbstractAgent verification" begin
+
+        person1 = Person("Edinbrugh",46//1)             
+        person3 = Person("Abderdeen",25 + 3 // 12) 
 
         @test verifyAgentsJLContract(person3)
         @test verifyAgentsJLContract(Person)
@@ -64,37 +57,36 @@ initMultiAgents()
 
     population = ABM{Person}(t = 1980 // 1, variables = PopVars())
 
-    add_agent!(population,person1)
-    add_agent!(population,person3)
-    add_agent!(population,person2)
-    add_agent!(population,person4)
-    add_agent!(person5,population)
-    add_agent!(person6,population) 
+    createInvalidPopulation!(population)
 
     @testset verbose=true "ABM functionalities validation" begin
 
         @test !verifyAgentsJLContract(population)
+
+        person2 = population[1]
         kill_agent!(person2,population)
         @test verifyAgentsJLContract(population)
 
         @test time(population) == 1980 // 1 
-        @test population[1] == person1 
+        @test population[1].id == person2.id 
 
-        kill_agent!(person2,population)
+        kill_agent!(population[1],population)
         @test nagents(population) == 4
 
-        @test_throws ArgumentError kill_agent!(person1,population)
+        @test_throws ArgumentError kill_agent!(person2,population)
         @test nagents(population) == 4
 
-        add_agent!(person1,population) 
+        add_agent!(person2,population) 
         @test nagents(population) == 5
  
         @test seed!(population,1) skip=true
-        @test move_agent!(person1,"The Highlands",population) skip=true
+        @test move_agent!(person2,"The Highlands",population) skip=true
 
     end 
 
     @testset verbose=true "pre-defined stepping functions of ABMs" begin
+
+        person1 = population[1]
 
         @test dummystep(population) == nothing 
         @test dummystep(person1, population) == nothing 
@@ -129,11 +121,14 @@ initMultiAgents()
 
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
 
+        person1 = population[1]
         age_step!(person1,population) 
         @test person1.age > 46 
 
+        person6 = population[5]
         age_step!(population)
-        @test person6.age == 29.5 
+        @test person6.age == 29.5
+
         year,month = date2YearsMonths(time(population))
         month += 1  # adjust 
         @test month == 2
@@ -166,17 +161,13 @@ initMultiAgents()
     end 
 
     pop = ABM{Person}(t = 1980 // 1)
-    add_agent!(pop,person1)
-    add_agent!(pop,person3)
-    add_agent!(pop,person4)
-    add_agent!(person5,pop)
-    add_agent!(person6,pop) 
+    createPopulation!(pop)
 
     simulator = FixedStepSim(dt=1//12,
                                 startTime=time(pop),finishTime=1990,
                                 verbose=false)
     
-    @testset verbose=true "Executing ABM with a simple simulation type" begin 
+    @testset verbose=true "Executing ABM in agents.jl-way" begin 
 
         @test currstep(simulator) == 1980 // 1 
         @test dt(simulator) == 1 // 12 
@@ -228,14 +219,8 @@ initMultiAgents()
 
     popWincome = ABM{Person}(t = 1980 // 1,
                         parameters = IncomePars(0.01), 
-                        variables = IncomeVar(person1.income))
-                        
-    add_agent!(popWincome,person1)
-    add_agent!(popWincome,person3)
-    add_agent!(popWincome,person2)
-    add_agent!(popWincome,person4)
-    add_agent!(person5,popWincome)
-    add_agent!(person6,popWincome) 
+                        variables = IncomeVar(0))
+    createPopulation!(popWincome)
 
     incomeChange!(person::Person,pop::ABM{Person},::ABMSimulation) =  
         person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier * person.income
@@ -290,6 +275,33 @@ initMultiAgents()
         @test popWincome.variables.averageIncome != 10000.0
 
     end
+
+    # 
+   
+
+    demography = Demography()
+
+    @testset verbose=true "Testing a MultiABM basic functionalities " begin 
+
+        @test nagents(demography) == 5
+        @test time(demography) == time(demography.pop)
+        @test demography[1].id == 1
+
+        person6 = Person(6,"Highlands",36//1) 
+        add_agent!(demography,person6)
+        @test demography[6].id == 6            
+        @test nagents(demography) == 6
+
+        kill_agent!(person6,demography)
+        @test nagents(demography) == 5
+
+    end 
+
+    @testset verbose=true "Executing A MultiABM in an Agent.jl-way" begin 
+
+        
+
+    end 
 
 end  # testset MultiAgents components 
 
