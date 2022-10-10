@@ -24,6 +24,7 @@ abstract type AbstractABM end
 allagents(model::AbstractABM) = model.agentsList
 
 function verifyAgentsJLContract(model::AbstractABM)
+    # necessary field names 
     #= all ids are unique =# 
     agents = allagents(model)
     ids    = [ id for agent in agents for id = agent.id]
@@ -96,7 +97,7 @@ Functionalities for agents within an ABM
 
 "add agent with its position to the model"
 function add_agent!(agent::AbstractAgent,model::AbstractABM) # where T <: AbstractAgent
-    push!(model.agentsList,agent)
+    push!(allagents(model),agent)
 end 
 
 "symmetry"
@@ -113,7 +114,7 @@ end
 move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 
 "remove an agent"
-kill_agent!(agent,model::AbstractABM) = removeFirst!(model.agentsList,agent)
+kill_agent!(agent,model::AbstractABM) = removeFirst!(allagents(model),agent)
 
 "symmety"
 kill_agent!(model::AbstractABM,agent) = kill_agent!(agent,model)
@@ -180,7 +181,7 @@ function step!(
     for _ in 1:n 
         
         if agents_first 
-            for agent in model.agentsList
+            for agent in allagents(model)
                 agent_step!(agent,model) 
             end
         end
@@ -188,7 +189,7 @@ function step!(
         model_step!(model)
     
         if !agents_first
-            for agent in model.agentsList
+            for agent in allagents(model)
                 agent_step!(agent,model)
             end
         end
