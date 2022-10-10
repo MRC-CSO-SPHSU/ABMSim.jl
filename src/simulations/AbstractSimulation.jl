@@ -4,7 +4,7 @@ Main specification of a Simulation type.
 
 using Random 
 import Random.seed! 
-export seed!
+#export seed!
 
 using Mixers 
 using Parameters 
@@ -98,7 +98,7 @@ mutable struct FixedStepSim <: AbsFixedStepSim
                 startTime = startTime, finishTime = finishTime,
                 seed = seed , verbose = verbose, yearly = yearly ), 0) 
     
-    FixedStepSim() = new(FixedStepSimPars(),0)
+    # FixedStepSim() = new(FixedStepSimPars(),0)
 end
 
 function verboseStep(sim::AbsFixedStepSim) 
