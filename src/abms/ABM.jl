@@ -14,9 +14,9 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     
     t :: Rational{Int}      # time 
     parameters              # model parameters ideally as a struct data type
-    data                    # data structure to be improved 
-    variables               # model properties Agents.jl   
-    
+    data                   
+    variables                
+
     ABM(agents::Vector{AgentType},t,pars,da,vars)  where AgentType  = 
         new{AgentType}(agents,t,pars,da,vars) 
 

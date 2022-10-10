@@ -153,13 +153,12 @@ function step!(
     agent_step!,
     n::Int=1
 )
-    
-    for i in range(1,n)
-        for agent in model.agentsList
+    for _ in 1:n 
+        for agent in allagents(model)
             agent_step!(agent,model) 
         end
     end 
-
+    nothing 
 end
 
 
@@ -195,7 +194,7 @@ function step!(
         end
     
     end
-
+    nothing 
 end # step! 
 
 
@@ -225,7 +224,7 @@ function step!(
         post_model_step!(model)
     
     end
-
+    nothing 
 end # step! 
 
 # Other versions of the step! function
