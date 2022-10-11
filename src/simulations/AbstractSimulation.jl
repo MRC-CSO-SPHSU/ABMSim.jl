@@ -11,13 +11,12 @@ using Parameters
 
 using MultiAgents.Util: date2YearsMonths 
 
-import MultiAgents: step!
-
+export dummystep, errorstep
 export dt, startTime, finishTime, seed, verbose, yearly
 export stepnumber, currstep
 
-export AbstractSimulation, AbsFixedStepSim, FixedStepSim
-export initFixedStepSim!
+export AbstractSimulation, AbsFixedStepSim, FixedStepSim, DefaultFixedStepSim
+export initFixedStepSim!, stepTime!
 
 abstract type AbstractSimulation end 
 
@@ -36,8 +35,8 @@ verbose(sim::AbstractSimulation)    = sim.parameters.verbose
 
 @mix @with_kw struct BasicPars 
     seed :: Int       = 0
-    startTime :: Int  = 0
-    finishTime :: Int = 0 
+    startTime :: Rational{Int}  = 0
+    finishTime :: Rational{Int} = 0 
     verbose :: Bool   = false
 #    sleeptime :: Float64 = 0.0
 end # BasicPars 
@@ -60,11 +59,32 @@ end
 
 abstract type AbsFixedStepSim <: AbstractSimulation end
 
+struct DefaultFixedStepSim <: AbsFixedStepSim end 
+
 dt(sim::AbsFixedStepSim)            = sim.parameters.dt 
 yearly(sim::AbsFixedStepSim)        = sim.parameters.yearly
 stepnumber(sim::AbsFixedStepSim)    = sim.stepnumber
 currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) + 
                                         Rational{Int}(startTime(sim))
+
+"dummy stepping function for arbitrary agents"
+dummystep(::AbstractAgent,::AbstractABM,
+            sim::AbsFixedStepSim=DefaultFixedStepSim()) = nothing 
+                                         
+"default dummy model stepping function"
+dummystep(::AbstractABM,
+            sim::AbsFixedStepSim=DefaultFixedStepSim()) = nothing 
+                                        
+"Default agent stepping function for reminding the client that it should be provided"
+errorstep(::AbstractAgent,::AbstractABM,
+            sim::AbsFixedStepSim=DefaultFixedStepSim()) = 
+                error("agent stepping function has not been specified")
+                                        
+"Default model stepping function for reminding the client that it should be provided"
+errorstep(::AbstractABM,
+            sim::AbsFixedStepSim=DefaultFixedStepSim()) = 
+                error("model stepping function has not been specified")
+                                        
 
 @mix @with_kw struct FixedStepPars 
     dt :: Rational{Int}     = 0 // 1  
@@ -75,15 +95,14 @@ end
 
 
 function initFixedStepSim!(sim::AbsFixedStepSim;
-                                        dt, startTime, finishTime,
-                                        seed=0, verbose=false, yearly=false) 
+                                dt, startTime, finishTime,
+                                seed=0, verbose=false, yearly=false) 
 
     initSimPars!(sim;startTime=startTime, finishTime=finishTime,
                             seed=seed, verbose=verbose)
 
     sim.parameters.dt       = dt
     sim.parameters.yearly   = yearly
-    # sim.currstep            = Rational{Int}(startTime) 
     sim.stepnumber          = 0
 
     nothing 
@@ -126,17 +145,77 @@ function verboseStep(var,msg::String,sim::AbsFixedStepSim)
     nothing 
 end
 
+stepTime!(model::AbstractABM,sim::AbsFixedStepSim) = 
+    model.t += dt(sim)
+
+function prestep!(model::AbstractABM,sim::AbsFixedStepSim) 
+    verbose(sim) ? verboseStep(sim) : nothing 
+    stepTime!(model,sim)
+    sim.stepnumber += 1
+    nothing 
+end 
+
+prestep!(model::AbstractABM,::DefaultFixedStepSim) = nothing 
+
+function apply_agent_step!(model,agent_step!,::DefaultFixedStepSim) 
+    for agent in allagents(model)
+        agent_step!(agent,model) 
+    end
+    nothing 
+end
+
+function apply_agent_step!(model,agent_step!,sim::AbsFixedStepSim) 
+    for agent in allagents(model)
+        agent_step!(agent,model,sim) 
+    end
+    nothing 
+end
+
+apply_model_step!(model,model_step!,::DefaultFixedStepSim) = model_step!(model) 
+apply_model_step!(model,model_step!,sim::AbsFixedStepSim) = model_step!(model,sim) 
+
+
+"""
+Stepping function for a model of type AgentBasedModel with 
+    agent_step!(agentObj,modelObj::AgentBasedModel) 
+    model_step!(modelObj::AgentBasedModel)
+    n::number of steps 
+    agents_first : agent_step! executed first before model_step
+"""
+function step!(model::AbstractABM,
+                agent_step!, sim::AbsFixedStepSim=DefaultFixedStepSim(); 
+                n::Int=1)
+
+    for _ in 1:n 
+        prestep!(model,sim)
+        apply_agent_step!(model,agent_step!,sim)
+    end
+
+    nothing 
+end 
 
 function step!(model::AbstractABM,
                 agent_step!,
                 model_step!,
-                sim::AbsFixedStepSim) 
+                sim::AbsFixedStepSim=DefaultFixedStepSim();  
+                n::Int=1,
+                agents_first::Bool=true ) 
     
-    sim.parameters.verbose ? verboseStep(sim) : nothing 
-    step!(model, agent_step!, model_step!)
-    model.t += dt(sim)
-    sim.stepnumber += 1
-    # sim.currstep += dt(sim)
+    for _ in 1:n 
+
+        prestep!(model,sim)
+
+        if agents_first 
+            apply_agent_step!(model,agent_step!,sim) 
+        end
+    
+        apply_model_step!(model,model_step!,sim)
+    
+        if !agents_first
+            apply_agent_step!(model,agent_step!,sim)
+        end
+        
+    end 
     nothing 
 end
 
@@ -150,33 +229,37 @@ Run a fixed step ABM simulation using stepping functions
 function run!(model::AbstractABM,
               agent_step!,
               model_step!,
-              simulation::AbsFixedStepSim) 
+              sim::AbsFixedStepSim) 
 
-    time(model) != currstep(simulation) ? 
-        throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(simulation))")) : 
+    time(model) != currstep(sim) ? 
+        throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(sim))")) : 
         nothing 
 
-    seed!(simulation)
+    seed!(sim)
 
-    for _ in currstep(simulation) : dt(simulation) : finishTime(simulation)
-        step!(model,agent_step!,model_step!,simulation)
-    end 
+    nsteps =  trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
+    step!(model,agent_step!,model_step!,sim,n=nsteps) 
 
     nothing 
 end 
 
 function step!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
-                sim::AbsFixedStepSim) 
+                sim::AbsFixedStepSim = DefaultFixedStepSim(); 
+                n::Int=1) 
 
-    sim.parameters.verbose ? verboseStep(sim) : nothing 
-    step!(model, pre_model_step!, agent_step!, post_model_step!)
-    model.t += dt(sim)
-    sim.stepnumber += 1
-    # sim.currstep += dt(sim)
+    for _ in 1:n
+
+        prestep!(model,sim)
+        
+        apply_model_step!(model,pre_model_step!,sim)
+        apply_agent_step!(model,agent_step!,sim)
+        apply_model_step!(model,post_model_step!,sim)
+
+    end
+    
     nothing 
 end
-
 
 function run!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
@@ -188,47 +271,14 @@ function run!(model::AbstractABM,
     
     seed!(sim)
 
-    for _ in currstep(sim) : dt(sim) : finishTime(sim)
-        step!(model,pre_model_step!, agent_step!, post_model_step!,sim)
-    end 
-
+    nsteps =  trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
+    step!(model,pre_model_step!, agent_step!, post_model_step!,sim,n=nsteps)
+    
     nothing 
 end 
 
-
-#=
-"""
-  This type corresponds to use Agents.jl capabilities for simualtion without  
-  using MultiAgents.jl, i.e. there will be no Simulation types and only Agents.jl
-  will be used for simulation  
-"""
-struct DefaultSimulation <: AbstractSimulation end 
-
-step!(
-    simulation::DefaultSimulation, 
-    model,
-    agent_step!,
-    model_step!,  
-    n::Int=1,
-    agents_first::Bool=true,
-)  = step!(model,agent_step!,model_step!,n,agents_first)
-
-step!(
-    simulation::DefaultSimulation, 
-    model, 
-    pre_model_step!,
-    agent_step!,
-    post_model_step!,  
-    n::Int=1,
-)  = step!(model,pre_model_step!,agent_step!,post_model_step!,n)
-
-step!(
-    simulation::DefaultSimulation,
-    model::AbstractABM, 
-    pre_model_steps::Vector{Function},
-    agent_steps,
-    post_model_steps,  
-    n::Int=1,
-)  = step!(model,pre_model_steps,agent_steps,post_model_steps,n)
-=# 
+# Other versions of the step! function
+#    model_step! is omitted 
+#    n(model,s)::Function 
+#    agent_step! function can be a dummystep 
 

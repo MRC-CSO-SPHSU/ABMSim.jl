@@ -10,7 +10,6 @@ import Base.time
 export AbstractABM 
 export allagents, nagents, time
 export add_agent!, move_agent!, kill_agent!
-export step!, dummystep, errorstep
 export verifyAgentsJLContract
 
 
@@ -126,23 +125,7 @@ Other potential functions
 genocide(model::ABM): kill all agents 
 =# 
 
-#===========================
-General stepping functions / imitating Agents.jl 
-=###########################
-
-"dummy stepping function for arbitrary agents"
-dummystep(::AbstractAgent,::AbstractABM) = nothing 
- 
-"default dummy model stepping function"
-dummystep(::AbstractABM) = nothing 
-
-"Default agent stepping function for reminding the client that it should be provided"
-errorstep(::AbstractAgent,::AbstractABM) = error("agent stepping function has not been specified")
-
-"Default model stepping function for reminding the client that it should be provided"
-errorstep(::AbstractABM) = error("model stepping function has not been specified")
-
-
+#= 
 """
 Stepping function for a model of type AgentBasedModel with 
     agent_step!(agentObj,modelObj::AgentBasedModel) 
@@ -163,76 +146,9 @@ function step!(
     nothing 
 end
 
-
-"""
-Stepping function for a model of type AgentBasedModel with 
-    agent_step!(agentObj,modelObj::AgentBasedModel) 
-    model_step!(modelObj::AgentBasedModel)
-    n::number of steps 
-    agents_first : agent_step! executed first before model_step
-"""
-function step!(
-    model::AbstractABM, 
-    agent_step!,
-    model_step!;  
-    n::Int=1,
-    agents_first::Bool=true 
-)  
-    
-    for _ in 1:n 
-        
-        if agents_first 
-            for agent in allagents(model)
-                agent_step!(agent,model) 
-            end
-        end
-    
-        model_step!(model)
-    
-        if !agents_first
-            for agent in allagents(model)
-                agent_step!(agent,model)
-            end
-        end
-    
-    end
-    nothing 
-end # step! 
+=# 
 
 
-"""
-Stepping function for a model of type AgentBasedModel with 
-    pre_model_step!(modelObj::AgentBasedModel)
-    agent_step!(agentObj,modelObj::AgentBasedModel) 
-    model_step!(modelObj::AgentBasedModel)
-    n::number of steps 
-"""
-function step!(
-    model::AbstractABM,
-    pre_model_step!, 
-    agent_step!,
-    post_model_step!;  
-    n::Int=1,
-)  
-    
-    for _ in 1:n
-        
-        pre_model_step!(model)
-    
-        for agent in model.agentsList
-            agent_step!(agent,model)
-        end
-        
-        post_model_step!(model)
-    
-    end
-    nothing 
-end # step! 
-
-# Other versions of the step! function
-#    model_step! is omitted 
-#    n(model,s)::Function 
-#    agent_step! function can be a dummystep 
 
 "ensure symmetry when initializing ABMs via their declaration"
 initial_connect!(abm2::T2,
