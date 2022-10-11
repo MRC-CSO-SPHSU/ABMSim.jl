@@ -1,4 +1,6 @@
-import Base.time
+using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
+using MultiAgents: AbstractXAgent, ABM, AbstractMABM  
+using MultiAgents: getIDCOUNTER, add_agent!
 
 mutable struct Person <: AbstractXAgent 
     id::Int 
@@ -7,7 +9,6 @@ mutable struct Person <: AbstractXAgent
     income::Float64  
     Person(position,a::Rational{Int}) = new(getIDCOUNTER(),position,a,10000.0)
     Person(id,position,a::Rational{Int}) = new(id,position,a,10000.0)
-
 end 
 
 # List of persons 
@@ -64,6 +65,7 @@ end
 
 mutable struct Demography <: AbstractMABM
 
+    t :: Rational{Int}
     pop :: ABM{Person}   # population 
     shares :: ABM{Stock} # stocks 
 
@@ -71,14 +73,14 @@ end
 
 function Demography()
 
-    population = ABM{Person}(   parameters = nothing, 
+    population = ABM{Person}(t = 1980 // 1,
+                                parameters = nothing, 
                                 variables = nothing) 
         
     createPopulation!(population)
     
-    stocks = ABM{Stock}(t = time(population), 
-                            parameters = nothing,
-                            variables = nothing) 
+    stocks = ABM{Stock}(parameters = nothing,
+                        variables = nothing) 
 
     for person in allagents(population)
         stock = Stock(person) 
@@ -86,9 +88,16 @@ function Demography()
         person.income -= stock.quantity * stock.price 
     end 
 
-    Demography(population,stocks)
+    Demography(time(population),population,stocks)
 end  
 
-allagents(demography::Demography) = allagents(demography.pop)
-time(demography::Demography) = time(demography.pop)
+mainabm(demography::Demography) = demography.pop 
 
+import MultiAgents: allagents
+allagents(demography::Demography) = allagents(mainabm(demography))
+
+import MultiAgents: stepTime!
+function stepTime!(demography::Demography,sim::FixedStepSim) 
+    demography.t += dt(sim)
+    stepTime!(demography.pop,sim) 
+end 
