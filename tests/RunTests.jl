@@ -35,7 +35,6 @@ include("./datatypes.jl")
 @testset "MultiAgents Components Testing" begin
     
 
-
     @testset verbose=true "AbstractAgent verification" begin
 
         person1 = Person("Edinbrugh",46//1)             
@@ -49,17 +48,17 @@ include("./datatypes.jl")
 
     end 
 
-    # a dummy ABM 
-    mutable struct PopVars 
-        stepnumber :: Int 
-        PopVars() = new(0)
-    end
-
-    population = ABM{Person}(t = 1980 // 1, variables = PopVars())
-
-    createInvalidPopulation!(population)
 
     @testset verbose=true "ABM functionalities validation" begin
+
+        mutable struct PopVars 
+            stepnumber :: Int 
+            PopVars() = new(0)
+        end
+
+        population = ABM{Person}(t = 1980 // 1, variables = PopVars())
+
+        createInvalidPopulation!(population)
 
         @test !verifyAgentsJLContract(population)
 
@@ -85,6 +84,9 @@ include("./datatypes.jl")
     end 
 
     @testset verbose=true "pre-defined stepping functions of ABMs" begin
+
+        population = ABM{Person}(t = 1980 // 1, variables = PopVars())
+        createPopulation!(population)
 
         person1 = population[1]
 
@@ -121,13 +123,16 @@ include("./datatypes.jl")
 
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
 
+        population = ABM{Person}(t = 1980 // 1, variables = PopVars())
+        createPopulation!(population)
+        
         person1 = population[1]
         age_step!(person1,population) 
         @test person1.age > 46 
 
         person6 = population[5]
         age_step!(population)
-        @test person6.age == 29.5
+        @test person6.age == 29 + 6 // 12 
 
         year,month = date2YearsMonths(time(population))
         month += 1  # adjust 
@@ -160,14 +165,15 @@ include("./datatypes.jl")
         
     end 
 
-    pop = ABM{Person}(t = 1980 // 1)
-    createPopulation!(pop)
+       
+    @testset verbose=true "Simulating ab ABM with a simple simulator" begin 
 
-    simulator = FixedStepSim(dt=1//12,
+        pop = ABM{Person}(t = 1980 // 1)
+        createPopulation!(pop)
+
+        simulator = FixedStepSim(dt=1//12,
                                 startTime=time(pop),finishTime=1990,
                                 verbose=false)
-    
-    @testset verbose=true "Executing ABM in agents.jl-way" begin 
 
         @test currstep(simulator) == 1980 // 1 
         @test dt(simulator) == 1 // 12 
@@ -190,9 +196,6 @@ include("./datatypes.jl")
                                         startTime = 1990,
                                         finishTime = 2000) 
 
-        # println(pop.time) 
-        # println(currstep(simulator))
-
         @test_throws ArgumentError run!(pop,dummystep,age_step!,dummystep,simulator) 
 
         pop.t = currstep(simulator)
@@ -207,20 +210,8 @@ include("./datatypes.jl")
         @test time(pop) == finishTime(simulator) + dt(simulator)
         @test currstep(simulator) == time(pop) 
         @test stepnumber(simulator) == 121
+
     end
-
-    struct IncomePars
-        changeModifier::Float64
-    end 
-
-    mutable struct IncomeVar 
-        averageIncome::Float64 
-    end 
-
-    popWincome = ABM{Person}(t = 1980 // 1,
-                        parameters = IncomePars(0.01), 
-                        variables = IncomeVar(0))
-    createPopulation!(popWincome)
 
     incomeChange!(person::Person,pop::ABM{Person},::ABMSimulation) =  
         person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier * person.income
@@ -240,6 +231,19 @@ include("./datatypes.jl")
 
 
     @testset verbose=true "Executing ABM with an ABM Simulation type" begin 
+
+        struct IncomePars
+            changeModifier::Float64
+        end 
+    
+        mutable struct IncomeVar 
+            averageIncome::Float64 
+        end 
+    
+        popWincome = ABM{Person}(t = 1980 // 1,
+                            parameters = IncomePars(0.01), 
+                            variables = IncomeVar(0))
+        createPopulation!(popWincome)
 
         @test_throws Exception  abmsim = 
                 ABMSimulation( dt=1//12,
@@ -313,8 +317,6 @@ include("./datatypes.jl")
 
         nothing 
     end
-    
-    # println(demography) 
 
     @testset verbose=true "Executing A MultiABM in an Agent.jl-way" begin 
 
@@ -330,7 +332,6 @@ include("./datatypes.jl")
 
     end 
 
-    # println(demography)
 
 end  # testset MultiAgents components 
 
