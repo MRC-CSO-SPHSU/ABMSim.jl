@@ -4,7 +4,7 @@ Definition of an ABM-Simulation type.
 
 export ABMSimulation 
 
-using MultiAgents: defaultpoststep!, defaultprestep! 
+# using MultiAgents: defaultpoststep!, defaultprestep! 
 using MultiAgents.Util: AbstractExample, DefaultExample
 
 mutable struct ABMSimulation <: AbstractABMSimulation  
@@ -19,7 +19,8 @@ mutable struct ABMSimulation <: AbstractABMSimulation
 
     function ABMSimulation(pars;
                            example=DefaultExample(),setupEnabled=true) 
-        abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
+        # abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
+        abmsimulation = new(pars,[],[],[],0)
         setupEnabled ? setup!(abmsimulation,example) : nothing 
         abmsimulation 
     end

@@ -9,7 +9,7 @@ export AbstractABMSimulation
 export attach_agent_step!, attach_pre_model_step!, attach_post_model_step!
 export setup!, step!, run! 
 
-export defaultprestep!, defaultpoststep!
+# export defaultprestep!, defaultpoststep!
 
 "Abstract type for ABMs" 
 abstract type AbstractABMSimulation <: AbsFixedStepSim end
@@ -21,7 +21,6 @@ abstract type AbstractABMSimulation <: AbsFixedStepSim end
 """
 setup!(sim::AbstractABMSimulation,::AbstractExample) = 
     error("setup! function for $(typeof(sim)) should be implemented")  
-    # nothing     
 
 #=  TODO update with sim.parameters 
 "get a symbol property from a Simulation"
@@ -38,8 +37,6 @@ Base.setproperty!(sim::AbstractABMSimulation,property::Symbol,val) =
 
 =# 
 
-# attaching a stepping function is done via a function call, 
-# since data structure is subject to change, e.g. Vector{Function}
 
 "attach an agent step function to the simulation"
 function attach_agent_step!(simulation::AbstractABMSimulation,
@@ -63,63 +60,9 @@ function attach_post_model_step!(simulation::AbstractABMSimulation,
     nothing
 end 
 
-"Default instructions before stepping an abm"
-function defaultpoststep!(::AbstractABM,sim::AbstractABMSimulation)  
-    sim.stepnumber += 1 
-    nothing 
-end
+step!(model::AbstractABM,sim::AbstractABMSimulation;n::Int=1) = 
+    step!(model,sim.pre_model_steps,sim.agent_steps,sim.post_model_steps,sim,n=n)
 
-"Default instructions after stepping an abm"
-function defaultprestep!(abm::AbstractABM,sim::AbstractABMSimulation)  
-    abm.t   +=  dt(sim)
-    nothing 
-end
+run!(model::AbstractABM, sim::AbstractABMSimulation) = 
+    run!(model,sim.pre_model_steps,sim.agent_steps,sim.post_model_steps,sim)
 
-"""
-Step an ABM given a set of independent stepping functions
-    pre_model_steps[:](modelObj::AgentBasedModel,simObj::SimulationType)
-    agent_steps[:](agentObj,modelObj::AgentBasedModel,simObj::SimulationType) 
-    model_step[:](modelObj::AgentBasedModel,simObj::SimulationType)
-    n::number of steps 
-"""
-function step!(model::AbstractABM,sim::AbstractABMSimulation, n::Int=1) 
-
-    for _ in 1:n 
- 
-        sim.parameters.verbose ? verboseStep(sim) : nothing 
-
-        for k in 1:length(sim.pre_model_steps)
-            sim.pre_model_steps[k](model,sim)
-        end
- 
-        for agent in allagents(model)
-            for k in 1:length(sim.agent_steps)
-                sim.agent_steps[k](agent,model,sim)
-            end 
-        end
-                                
-        for k in 1:length(sim.post_model_steps)
-            sim.post_model_steps[k](model,sim)
-        end
-                        
-    end # for _ 
-
-    nothing 
-end # step! 
-
-
- 
-function run!(model::AbstractABM, sim::AbstractABMSimulation) 
-
-    time(model) != currstep(sim) ? 
-        throw(ArgumentError("$(time(model)) is not equal to simulation currentstep $(currstep(sim))")) : 
-        nothing 
-
-    seed!(sim)
-
-    for _ in currstep(sim) : dt(sim) : finishTime(sim)
-        step!(model,sim)
-    end 
-
-    nothing 
-end 

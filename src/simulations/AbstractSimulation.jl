@@ -2,10 +2,6 @@
 Main specification of a Simulation type. 
 """
 
-using Random 
-import Random.seed! 
-#export seed!
-
 using Mixers 
 using Parameters 
 
@@ -23,7 +19,6 @@ abstract type AbstractSimulation end
 startTime(sim::AbstractSimulation)  = sim.parameters.startTime
 finishTime(sim::AbstractSimulation) = sim.parameters.finishTime
 seed(sim::AbstractSimulation)       = sim.parameters.seed
-seed!(sim::AbstractSimulation)      = seed(sim) == 0 ?  Random.seed!(floor(Int, time())) : Random.seed!(seed)  
 verbose(sim::AbstractSimulation)    = sim.parameters.verbose 
 
 
@@ -157,22 +152,31 @@ end
 
 prestep!(model::AbstractABM,::DefaultFixedStepSim) = nothing 
 
-function apply_agent_step!(model,agent_step!,::DefaultFixedStepSim) 
+function apply_agent_step!(model,agent_step!::Function,::DefaultFixedStepSim) 
     for agent in allagents(model)
         agent_step!(agent,model) 
     end
     nothing 
 end
 
-function apply_agent_step!(model,agent_step!,sim::AbsFixedStepSim) 
+function apply_agent_step!(model,agent_step!::Function,sim::AbsFixedStepSim) 
     for agent in allagents(model)
         agent_step!(agent,model,sim) 
     end
     nothing 
 end
 
-apply_model_step!(model,model_step!,::DefaultFixedStepSim) = model_step!(model) 
-apply_model_step!(model,model_step!,sim::AbsFixedStepSim) = model_step!(model,sim) 
+apply_agent_step!(model,agent_steps::Vector{Function},sim::AbsFixedStepSim) = 
+    for k in 1:length(agent_steps) 
+        apply_agent_step!(model,agent_steps[k],sim)
+    end 
+
+apply_model_step!(model,model_step!::Function,::DefaultFixedStepSim) = model_step!(model) 
+apply_model_step!(model,model_step!::Function,sim::AbsFixedStepSim) = model_step!(model,sim) 
+apply_model_step!(model,model_steps::Vector{Function},sim::AbsFixedStepSim) = 
+    for k in 1:length(model_steps) 
+        apply_model_step!(model,model_steps[k],sim)
+    end
 
 
 """
@@ -193,6 +197,23 @@ function step!(model::AbstractABM,
 
     nothing 
 end 
+
+function prerun!(model,sim)::Int  
+    time(model) != currstep(sim) ? 
+        throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(sim))")) :
+        nothing 
+    seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
+    trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
+end
+
+function run!(model::AbstractABM,
+                agent_step!, 
+                sim::AbsFixedStepSim=DefaultFixedStepSim())
+    nsteps = prerun!(model,sim)
+    step!(model,agent_step!,sim,n=nsteps) 
+    nothing 
+end 
+
 
 function step!(model::AbstractABM,
                 agent_step!,
@@ -230,16 +251,8 @@ function run!(model::AbstractABM,
               agent_step!,
               model_step!,
               sim::AbsFixedStepSim) 
-
-    time(model) != currstep(sim) ? 
-        throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(sim))")) : 
-        nothing 
-
-    seed!(sim)
-
-    nsteps =  trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
+    nsteps = prerun!(model,sim)
     step!(model,agent_step!,model_step!,sim,n=nsteps) 
-
     nothing 
 end 
 
@@ -264,16 +277,37 @@ end
 function run!(model::AbstractABM,
                 pre_model_step!, agent_step!, post_model_step!,
                 sim::AbsFixedStepSim) 
+    nsteps = prerun!(model,sim) 
+    step!(model,pre_model_step!, agent_step!, post_model_step!,sim,n=nsteps)  
+    nothing 
+end 
 
-    time(model) != currstep(sim) ? 
-        throw(ArgumentError("$(time(model)) is not equal to simulation currentstep $(currstep(sim))")) : 
-        nothing 
-    
-    seed!(sim)
+function step!(model::AbstractABM,
+                pre_model_steps::Vector{Function}, 
+                agent_steps::Vector{Function}, 
+                post_model_steps::Vector{Function},
+                sim::AbsFixedStepSim = DefaultFixedStepSim(); 
+                n::Int=1) 
 
-    nsteps =  trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
-    step!(model,pre_model_step!, agent_step!, post_model_step!,sim,n=nsteps)
-    
+    for _ in 1:n
+
+        prestep!(model,sim)
+        apply_model_step!(model,pre_model_steps,sim)
+        apply_agent_step!(model,agent_steps,sim)
+        apply_model_step!(model,post_model_steps,sim)
+
+    end
+
+    nothing 
+end
+
+function run!(model::AbstractABM,
+                pre_model_steps::Vector{Function}, 
+                agent_steps::Vector{Function}, 
+                post_model_steps::Vector{Function},
+                sim::AbsFixedStepSim) 
+    nsteps =  prerun!(model,sim)
+    step!(model,pre_model_steps, agent_steps, post_model_steps,sim,n=nsteps)
     nothing 
 end 
 
