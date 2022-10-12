@@ -15,11 +15,10 @@ using Test
 using MultiAgents: initMultiAgents, verifyAgentsJLContract,  MAVERSION
 using MultiAgents: kill_agent!, seed!, nagents, time
 using MultiAgents: step!, errorstep, dummystep, run! 
-using MultiAgents: currstep, stepnumber, dt, startTime, finishTime
+using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, FixedStepSim, ABMSimulation
 using MultiAgents: initFixedStepSim!               
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
-import MultiAgents: setup!
 
 
 initMultiAgents()
@@ -73,7 +72,6 @@ include("./datatypes.jl")
         add_agent!(person2,population) 
         @test nagents(population) == 5
  
-        @test seed!(population,1) skip=true
         @test move_agent!(person2,"The Highlands",population) skip=true
 
     end 
@@ -171,21 +169,18 @@ include("./datatypes.jl")
                                 startTime=time(pop),finishTime=1990,
                                 verbose=false)
 
-        @test currstep(simulator) == 1980 // 1 
+        @test currstep(simulator) == 1980 // 1 == time(pop)
         @test dt(simulator) == 1 // 12 
         @test stepnumber(simulator) == 0 
-        @test time(pop) == 1980 // 1 
 
         step!(pop,age_step!,dummystep,simulator)
 
-        @test time(pop) > 1980 
-        @test currstep(simulator) == time(pop) 
+        @test currstep(simulator) ==time(pop) > 1980 
         @test stepnumber(simulator) == 1 
 
         run!(pop,age_step!,dummystep,simulator)
 
-        @test time(pop) == 1990 
-        @test currstep(simulator) == time(pop) 
+        @test currstep(simulator) ==time(pop) == 1990 
         @test stepnumber(simulator) == 120
 
         initFixedStepSim!(simulator, dt= 1 // 12, 
@@ -200,15 +195,13 @@ include("./datatypes.jl")
 
         # pop.t = currstep(simulator)
 
-        @test currstep(simulator) == 1990 
+        @test time(pop) == currstep(simulator) == 1990 
         @test dt(simulator) == 1 // 12 
         @test stepnumber(simulator) == 0 
-        @test time(pop) == 1990  
                                 
         run!(pop,dummystep,age_step!,dummystep,simulator) 
 
-        @test time(pop) == finishTime(simulator) 
-        @test currstep(simulator) == time(pop) 
+        @test currstep(simulator) == time(pop) == finishTime(simulator) 
         @test stepnumber(simulator) == 120
 
     end
@@ -230,7 +223,7 @@ include("./datatypes.jl")
     end 
 
 
-    @testset verbose=true "Simulation ABM with an ABM Simulation type" begin 
+    @testset verbose=true "Simulating an ABM with an ABM Simulation type" begin 
 
         struct IncomePars
             changeModifier::Float64
@@ -255,10 +248,9 @@ include("./datatypes.jl")
                                 verbose=false, yearly=true, 
                                 setupEnabled = false) 
 
-        @test currstep(abmsim) == 1980 // 1 
+        @test currstep(abmsim) == 1980 // 1 == time(popWincome)
         @test dt(abmsim) == 1 // 12 
         @test stepnumber(abmsim) == 0 
-        @test time(popWincome) == 1980 // 1
         @test nagents(popWincome) > 0 
 
         attach_agent_step!(abmsim,age_step!)
@@ -267,16 +259,13 @@ include("./datatypes.jl")
 
         step!(popWincome,abmsim)
 
-        @test currstep(abmsim) > 1980 // 1 
+        @test time(popWincome) == currstep(abmsim) > 1980 // 1 
         @test stepnumber(abmsim) == 1 
-        @test time(popWincome) == currstep(abmsim) 
 
         run!(popWincome,abmsim)
         
-        @test currstep(abmsim) == 1990 // 1 + 1 // 12
-        @test stepnumber(abmsim) == 121
-        @test time(popWincome) == currstep(abmsim) 
-        @test popWincome.variables.averageIncome != 10000.0
+        @test time(popWincome) == currstep(abmsim) == 1990 // 1 
+        @test stepnumber(abmsim) == 120
 
     end
 
@@ -301,9 +290,6 @@ include("./datatypes.jl")
     age_step!(person::Person,demography::Demography,
         sim::AbsFixedStepSim = DefaultFixedStepSim()) = 
             age_step!(person,demography.pop)
-    
-    incomeGain(person::Person,::Demography) = 
-        person.income += rand(1000.0,2000.0)
 
     function stock_step!(demography::Demography) 
 
@@ -317,7 +303,7 @@ include("./datatypes.jl")
         nothing 
     end
 
-    @testset verbose=true "Executing A MultiABM in an Agent.jl-way" begin 
+    @testset verbose=true "Simulating A MultiABM in an Agent.jl-way" begin 
 
         demography = Demography()
 
@@ -335,10 +321,7 @@ include("./datatypes.jl")
 
     end 
 
-    #age_step!(person::Person,demography::Demography,sim::FixedStepSim) = 
-    #    age_step!(person,mainabm(demography),sim) 
-
-    function stock_step!(demography::Demography,sim::FixedStepSim) 
+    function stock_step!(demography::Demography,sim::AbsFixedStepSim) 
 
         if sim.stepnumber % 12 != 0 return nothing end 
 
@@ -350,8 +333,9 @@ include("./datatypes.jl")
 
         nothing 
     end
-    
-    @testset verbose=true "Simulating an MultiABM with a simple simulator" begin 
+
+
+    @testset verbose=true "Simulating a MultiABM with a simple simulator" begin 
 
         demography = Demography()
 
@@ -363,19 +347,19 @@ include("./datatypes.jl")
         share1 = demography.shares[1]
         price = share1.price
 
-        @test currstep(simulator) == 1980 // 1 
+        @test currstep(simulator) == 1980 // 1 == time(demography)
         @test dt(simulator) == 1 // 12 
         @test stepnumber(simulator) == 0 
-        @test time(demography) == 1980 // 1 
         
         step!(demography,age_step!,stock_step!,simulator)
                             
-        @test time(demography) > 1980 
-        @test time(demography.pop) == 1980 + 1 // 12
-        @test currstep(simulator) == time(demography) 
+        @test time(demography) == time(demography.pop) == 
+                currstep(simulator) == 1980 + 1 // 12
         @test stepnumber(simulator) == 1 
         @test share1.price == price 
         @test time(demography.shares) == 0
+
+        step!(demography,age_step!,stock_step!,simulator,n=11)
 
         run!(demography,age_step!,stock_step!,simulator)
                             
@@ -396,13 +380,87 @@ include("./datatypes.jl")
                             finishTime = 2000 , 
                             verbose = false) 
 
-        run!(demography,dummystep,age_step!,dummystep,simulator) 
+        run!(demography,dummystep,age_step!,stock_step!,simulator) 
                             
         @test time(demography) == finishTime(simulator) == currstep(simulator)
         @test stepnumber(simulator) == 120
 
     end 
 
+
+    incomeGain!(person::Person,::Demography,
+                sim::AbsFixedStepSim = DefaultFixedStepSim()) = 
+                    person.income += ( rand() + 1 ) * 1000
+    
+    function buyStocks!(demography::Demography,sim::ABMSimulation) 
+        
+        for person in allagents(demography) 
+            if person.income > 10000
+                share = demography.shares[person.id]
+                qu = trunc(Int, person.income / share.price ) 
+                share.quantity += qu    
+                person.income -= qu * share.price
+                if verbose(sim)
+                    totalIncome = person.income + share.quantity * share.price 
+                    println("person $(person.id): income: $(person.income) / qu: $(share.quantity) / pr: $(share.price) / risk : $(share.pos) = $(totalIncome) ")
+                end 
+            end
+        end
+
+        nothing 
+    end
+    
+
+    @testset verbose=true "Simulating a MultiABM with an ABM Simulator" begin
+    
+        demography = Demography()  
+
+        @test_throws ErrorException  abmsim = 
+                ABMSimulation( dt=1//12,
+                                startTime=time(demography), 
+                                finishTime=time(demography)+10,
+                                verbose=false, yearly=true) 
+
+        abmsim = ABMSimulation( dt=1//12, startTime=time(demography), 
+                                            finishTime=time(demography)+10,
+                                            verbose=false, yearly=true,
+                                            setupEnabled = false) 
+        
+        @test currstep(abmsim) == 1980 // 1 == 
+                time(demography) == time(demography.pop)
+        
+        attach_post_model_step!(abmsim,stock_step!)
+        attach_agent_step!(abmsim,age_step!)
+        attach_agent_step!(abmsim,incomeGain!)
+        attach_post_model_step!(abmsim,buyStocks!)
+
+        person1 = demography[1]
+        income1 = person1.income 
+        share1 = demography.shares[1]
+        price1 = share1.price 
+        quantity1 = share1.quantity 
+
+        step!(demography,abmsim)
+
+        @test time(demography) == time(demography.pop) == 
+                currstep(abmsim) > 1980 // 1 
+        @test stepnumber(abmsim) == 1 
+        @test income1 != person1.income 
+
+        step!(demography,abmsim, n = 12)
+
+        @test time(demography) == time(demography.pop) == 
+                currstep(abmsim) > 1980 // 1 
+        @test time(demography.shares) == 1 
+        @test stepnumber(abmsim) == 13
+        @test price1 != share1.price 
+        @test quantity1 != share1.quantity
+        
+        run!(demography,abmsim)
+        @test currstep(abmsim) == finishTime(abmsim) ==
+                startTime(abmsim)+10 == time(demography)
+        @test stepnumber(abmsim) == 120 
+    end 
 
 end  # testset MultiAgents components 
 

@@ -57,7 +57,7 @@ mutable struct Stock <: AbstractXAgent
     quantity :: Int 
     price :: Float64
     function Stock(person::Person)
-        pr = rand(10.0:100.0) 
+        pr = (rand() + 1) * 10  
         qu = trunc(Int, person.income / pr)    
         new(person.id,rand(1:7),qu,pr) 
     end 
@@ -72,6 +72,8 @@ mutable struct Demography <: AbstractMABM
 end 
 
 function Demography()
+
+    seed!(floor(Int,time()))
 
     population = ABM{Person}(t = 1980 // 1,
                                 parameters = nothing, 
@@ -97,7 +99,7 @@ import MultiAgents: allagents
 allagents(demography::Demography) = allagents(mainabm(demography))
 
 import MultiAgents: stepTime!
-function stepTime!(demography::Demography,sim::FixedStepSim) 
+function stepTime!(demography::Demography,sim::AbsFixedStepSim) 
     demography.t += dt(sim)
     stepTime!(demography.pop,sim) 
 end 
