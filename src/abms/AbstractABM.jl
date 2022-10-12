@@ -6,6 +6,7 @@ Specification of an abstract ABM type as a supertype for all
 
 using  MultiAgents.Util: removeFirst!
 import Base.time 
+import Random.seed!
 
 export AbstractABM 
 export allagents, nagents, time
@@ -74,7 +75,9 @@ Functionalities for agents within an ABM
 
 
 "random seed of the model (Agents.jl)"
-seed!(model::AbstractABM,seed) = error("not implemented") 
+seed!(model::AbstractABM,seed) =
+    seed == 0 ? seed!(floor(Int,time())) : seed!(seed)
+
 
 "numbe of  agents"
 nagents(model::AbstractABM) = length(allagents(model))
