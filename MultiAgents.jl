@@ -21,9 +21,6 @@ module MultiAgents
     include("src/simulations/AbstractABMSimulation.jl")
     include("src/simulations/ABMSimulation.jl")
 
-    include("src/simulations/AbstractMABMSimulation.jl")
-    include("src/simulations/MABMSimulation.jl") 
-
     function initMultiAgents()
         resetIDCOUNTER()
         nothing 
