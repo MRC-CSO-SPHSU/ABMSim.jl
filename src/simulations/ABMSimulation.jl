@@ -4,28 +4,36 @@ Definition of an ABM-Simulation type.
 
 export ABMSimulation 
 
-using MultiAgents: defaultpoststep!, defaultprestep! 
-
-using SomeUtil:    AbstractExample, DummyExample 
+# using MultiAgents: defaultpoststep!, defaultprestep! 
+using MultiAgents.Util: AbstractExample, DefaultExample
 
 mutable struct ABMSimulation <: AbstractABMSimulation  
-    model::AbstractABM
-    properties::Dict{Symbol,Any} 
+    parameters::FixedStepSimPars 
     
     pre_model_steps::Vector{Function} 
     agent_steps::Vector{Function}       
     post_model_steps::Vector{Function} 
 
-    function ABMSimulation(abm::AbstractABM,properties::Dict{Symbol};
-                                 example::AbstractExample=DummyExample()) 
-        abmsimulation = new(abm,properties,[defaultprestep!],[],[defaultpoststep!])
-        setup!(abmsimulation,example)
+    # example 
+    stepnumber::Int 
+
+    function ABMSimulation(pars;
+                           example=DefaultExample(),setupEnabled=true) 
+        # abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
+        abmsimulation = new(pars,[],[],[],0)
+        setupEnabled ? setup!(abmsimulation,example) : nothing 
         abmsimulation 
     end
 
-    ABMSimulation(createABM::Function,properties::Dict{Symbol};
-                        example::AbstractExample=DummyExample()) = 
-                            ABMSimulation(createABM(),properties,example=example)
-
+    ABMSimulation(;dt, startTime, finishTime, 
+        example=DefaultExample(),
+        seed=0,verbose=false,yearly=false, 
+        setupEnabled = true) = 
+            ABMSimulation(FixedStepSimPars( dt=dt, 
+                                            startTime = startTime, finishTime = finishTime,
+                                            seed = seed, verbose = verbose, yearly = yearly), 
+                            example = example,
+                            setupEnabled = setupEnabled) 
+    
 end 
 

@@ -4,18 +4,14 @@
         This file is part of  Simulations module 
 """
 
-using  SomeUtil:    AbstractExample, DummyExample 
+using  MultiAgents.Util: AbstractExample, DummyExample 
 
 export MABMSimulation
 
 
 mutable struct MABMSimulation <: AbstractMABMSimulation 
 
-    model::AbstractMABM 
     simulations::Array{ABMSimulation,1}
-    properties::Dict{Symbol,Any}    # Simualtion propoerties    
-    
-    #mabm_step::Function 
     
     function MABMSimulation(mabm::AbstractMABM,properties::Dict{Symbol};
                             example::AbstractExample=DummyExample())

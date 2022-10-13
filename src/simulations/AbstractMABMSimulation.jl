@@ -4,15 +4,16 @@
     This source file is part of the Simulations module 
 """ 
 
-using  SomeUtil:    AbstractExample, DummyExample 
+using  MultiAgents.Util: AbstractExample, DummyExample 
 
 export AbstractMABMSimulation 
 export setup!, step!, run! 
 
-abstract type AbstractMABMSimulation <: AbstractSimulation end 
+abstract type AbstractMABMSimulation <: AbstractABMSimulation end 
 
 "setting up the simualtion properties and stepping functions"
-setup!(::AbstractMABMSimulation,::AbstractExample) = nothing 
+setup!(::AbstractMABMSimulation,::AbstractExample) = 
+    error("setup! function for $(typeof(sim)) should be implemented")  
 
 "condcut n simulation step(s) for a given MABM"
 function step!(sim::AbstractMABMSimulation,n::Int=1)
