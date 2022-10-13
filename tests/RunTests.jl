@@ -458,8 +458,10 @@ include("./datatypes.jl")
         
         run!(demography,abmsim)
         @test currstep(abmsim) == finishTime(abmsim) ==
-                startTime(abmsim)+10 == time(demography)
+                startTime(abmsim)+10 == time(demography) == 
+                time(demography.pop)
         @test stepnumber(abmsim) == 120 
+        @test time(demography.shares) == 10
     end 
 
 end  # testset MultiAgents components 
