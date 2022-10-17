@@ -8,7 +8,10 @@ export ABM
 
 # dummydeclare(dict::Dict{Symbol}=Dict{Symbol}()) = nothing 
 
-"Agent based model specification for social simulations"
+"""
+Agent based model specification for social simulations
+    with data, parameters, time and variable fields 
+"""
 mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     agentsList::Vector{AgentType}
     
@@ -20,11 +23,15 @@ mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
     ABM(agents::Vector{AgentType},t,pars,da,vars)  where AgentType  = 
         new{AgentType}(agents,t,pars,da,vars) 
 
+    ABM{AgentType}(agents::Vector{AgentType};t=0//1, parameters=nothing, 
+                                  data=nothing, variables=nothing) where AgentType =
+        ABM(agents,t,parameters,data,variables)
+     
     ABM{AgentType}(;t=0//1, parameters=nothing, 
                     data=nothing, variables=nothing,  
                     declare::Function = pars -> Vector{AgentType}()) where AgentType  = 
-        ABM(declare(parameters),t,parameters,data,variables)
-    
+        ABM(declare(parameters),t,parameters,data,variables) 
+
 end # AgentBasedModel  
 
 
