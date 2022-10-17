@@ -65,7 +65,6 @@ end
 
 mutable struct Demography <: AbstractMABM
 
-    t :: Rational{Int}
     pop :: ABM{Person}   # population 
     shares :: ABM{Stock} # stocks 
 
@@ -75,9 +74,8 @@ function Demography()
 
     seed!(floor(Int,time()))
 
-    population = ABM{Person}(t = 1980 // 1,
-                                parameters = nothing, 
-                                variables = nothing) 
+    population = ABM{Person}(parameters = nothing, 
+                             variables = nothing) 
         
     createPopulation!(population)
     
@@ -90,16 +88,10 @@ function Demography()
         person.income -= stock.quantity * stock.price 
     end 
 
-    Demography(time(population),population,stocks)
+    Demography(population,stocks)
 end  
 
 mainabm(demography::Demography) = demography.pop 
 
 import MultiAgents: allagents
 allagents(demography::Demography) = allagents(mainabm(demography))
-
-import MultiAgents: stepTime!
-function stepTime!(demography::Demography,sim::AbsFixedStepSim) 
-    demography.t += dt(sim)
-    stepTime!(demography.pop,sim) 
-end 

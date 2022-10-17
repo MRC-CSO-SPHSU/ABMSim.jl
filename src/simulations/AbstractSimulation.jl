@@ -141,12 +141,8 @@ function verboseStep(var,msg::String,sim::AbsFixedStepSim)
     nothing 
 end
 
-stepTime!(model::AbstractABM,sim::AbsFixedStepSim) = 
-    model.t += dt(sim)
-
 function prestep!(model::AbstractABM,sim::AbsFixedStepSim) 
     verbose(sim) ? verboseStep(sim) : nothing 
-    stepTime!(model,sim)
     sim.stepnumber += 1
     nothing 
 end 
@@ -200,9 +196,6 @@ function step!(model::AbstractABM,
 end 
 
 function prerun!(model,sim)::Int  
-    time(model) != currstep(sim) ? 
-        throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(sim))")) :
-        nothing 
     if Random.GLOBAL_SEED != seed(sim)
         seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
     end 

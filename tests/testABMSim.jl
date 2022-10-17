@@ -32,9 +32,8 @@ mutable struct IncomeVar
     averageIncome::Float64 
 end 
 
-population = ABM{Person}(t = 1980 // 1,
-                    parameters = IncomePars(0.1), 
-                    variables = IncomeVar(person1.income))    
+population = ABM{Person}(parameters = IncomePars(0.1), 
+                            variables = IncomeVar(person1.income))    
 
 add_agent!(population,person1)
 add_agent!(population,person3)
@@ -72,7 +71,7 @@ function setup!(abmsim::ABMSimulation,::DefaultExample)
 end 
 
 abmsim = ABMSimulation( dt=1//12,
-                    startTime= time(population), finishTime=1990,
+                    startTime= 1980, finishTime=1990,
                     verbose=true, yearly=true) 
 
 println(abmsim)

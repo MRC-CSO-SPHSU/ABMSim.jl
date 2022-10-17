@@ -6,8 +6,8 @@
 """ 
 
 export AbstractMABM
-import MultiAgents: allagents, getindex, nagents, add_agent!, move_agent!, kill_agent!
-export allagents, getindex, nagents, add_agent!, move_agent!, kill_agent!
+import MultiAgents: allagents, nagents, add_agent!, move_agent!, kill_agent!
+export allagents, nagents, add_agent!, move_agent!, kill_agent!
 
 
 abstract type AbstractMABM  <: AbstractABM end   
