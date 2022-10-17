@@ -4,6 +4,7 @@ Main specification of a Simulation type.
 
 using Mixers 
 using Parameters 
+using Random
 
 using MultiAgents.Util: date2YearsMonths 
 
@@ -202,7 +203,9 @@ function prerun!(model,sim)::Int
     time(model) != currstep(sim) ? 
         throw(ArgumentError("$(time(model)) is not initially equal to simulation currentstep $(currstep(sim))")) :
         nothing 
-    seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
+    if Random.GLOBAL_SEED != seed(sim)
+        seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
+    end 
     trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
 end
 
