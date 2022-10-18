@@ -13,7 +13,7 @@ export dt, startTime, finishTime, seed, verbose, yearly
 export stepnumber, currstep
 
 export AbstractSimulation, AbsFixedStepSim, FixedStepSim, DefaultFixedStepSim
-export initFixedStepSim!, stepTime!
+export initFixedStepSim!, initFixedStepSimPars!
 
 abstract type AbstractSimulation end 
 
@@ -34,7 +34,8 @@ verbose(sim::AbstractSimulation)    = sim.parameters.verbose
     startTime :: Rational{Int}  = 0
     finishTime :: Rational{Int} = 0 
     verbose :: Bool   = false
-#    sleeptime :: Float64 = 0.0
+    sleeptime :: Float64 = 0.0
+    checkassumption :: Bool = false 
 end # BasicPars 
 
 @BasicPars mutable struct SimPars end 
@@ -89,6 +90,19 @@ end
 
 @BasicPars @FixedStepPars mutable struct FixedStepSimPars end
 
+function initFixedStepSimPars!(simPars::FixedStepSimPars,pars) 
+    if !(fieldnames(typeof(pars)) ⊆ fieldnames(FixedStepSimPars))  
+        throw(ArgumentError("$(fieldnames(typeof(pars))) has fields not present in $(fieldnames(FixedStepSimPars))")) 
+    end
+    for sym in fieldnames(typeof(pars))
+        val = getproperty(pars,sym)
+        setproperty!(simPars,sym,val)
+    end
+    nothing 
+end
+ 
+initFixedStepSim!(sim::AbsFixedStepSim,pars) = 
+    initFixedStepSimPars!(sim.parameters,pars)
 
 function initFixedStepSim!(sim::AbsFixedStepSim;
                                 dt, startTime, finishTime,
@@ -113,7 +127,11 @@ mutable struct FixedStepSim <: AbsFixedStepSim
                 startTime = startTime, finishTime = finishTime,
                 seed = seed , verbose = verbose, yearly = yearly ), 0) 
     
-    # FixedStepSim() = new(FixedStepSimPars(),0)
+    function FixedStepSim(pars) 
+        sim = new(FixedStepSimPars(),0)
+        initFixedStepSim!(sim,pars)
+        sim
+    end 
 end
 
 function verboseStep(sim::AbsFixedStepSim) 
@@ -196,7 +214,7 @@ function step!(model::AbstractABM,
 end 
 
 function prerun!(model,sim)::Int  
-    if Random.GLOBAL_SEED != seed(sim)
+    if Random.GLOBAL_SEED != seed(sim) 
         seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
     end 
     trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 

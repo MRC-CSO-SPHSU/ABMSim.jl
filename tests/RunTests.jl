@@ -165,13 +165,32 @@ include("./datatypes.jl")
         pop = ABM{Person}()
         createPopulation!(pop)
 
-        simulator = FixedStepSim(dt=1//12,
-                                startTime=1980,finishTime=1990,
+        simulator2 = FixedStepSim(dt=1//12,
+                                startTime=1981,finishTime=1991,
                                 verbose=false)
 
-        @test currstep(simulator) == 1980 // 1
-        @test dt(simulator) == 1 // 12 
-        @test stepnumber(simulator) == 0 
+        mutable struct SimPars1 
+            startTime
+            dummy 
+            SimPars1() = new(1980,false)
+        end 
+
+        @test_throws ArgumentError initFixedStepSim!(simulator2,SimPars1())
+
+        mutable struct SimPars2 
+            dt
+            startTime
+            finishTime 
+            SimPars2() = new(1//12,1980,1990)
+        end 
+
+        initFixedStepSim!(simulator2,SimPars2())
+        
+        simulator = FixedStepSim(SimPars2())
+
+        @test currstep(simulator2) == 1980 // 1 == currstep(simulator)
+        @test dt(simulator2) == 1 // 12 == dt(simulator)
+        @test stepnumber(simulator2) == 0 == stepnumber(simulator)  
 
         step!(pop,age_step!,dummystep,simulator)
 
@@ -186,8 +205,6 @@ include("./datatypes.jl")
         initFixedStepSim!(simulator, dt= 1 // 12, 
                             startTime = 1990,
                             finishTime = 2000) 
-
-        # pop.t = currstep(simulator)
 
         @test currstep(simulator) == 1990 
         @test dt(simulator) == 1 // 12 

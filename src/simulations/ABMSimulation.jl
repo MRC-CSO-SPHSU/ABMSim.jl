@@ -17,13 +17,20 @@ mutable struct ABMSimulation <: AbstractABMSimulation
     # example 
     stepnumber::Int 
 
-    function ABMSimulation(pars;
+    function ABMSimulation(pars::FixedStepSimPars;
                            example=DefaultExample(),setupEnabled=true) 
         # abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
         abmsimulation = new(pars,[],[],[],0)
         setupEnabled ? setup!(abmsimulation,example) : nothing 
         abmsimulation 
     end
+
+    function ABMSimulation(pars;example=DefaultExample(),setupEnabled=true) 
+        parameters = FixedStepSimPars()
+        initFixedStepSimPars!(parameters,pars)
+        ABMSimulation(parameters,example=example,setupEnabled=setupEnabled)
+    end
+        
 
     ABMSimulation(;dt, startTime, finishTime, 
         example=DefaultExample(),
