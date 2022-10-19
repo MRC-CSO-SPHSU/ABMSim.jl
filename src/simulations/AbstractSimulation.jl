@@ -6,7 +6,7 @@ using Mixers
 using Parameters 
 using Random
 
-using MultiAgents.Util: date2YearsMonths 
+using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
 
 export dummystep, errorstep
 export dt, startTime, finishTime, seed, verbose, yearly
@@ -33,9 +33,9 @@ verbose(sim::AbstractSimulation)    = sim.parameters.verbose
     seed :: Int       = 0
     startTime :: Rational{Int}  = 0
     finishTime :: Rational{Int} = 0 
-    verbose :: Bool   = false
-    sleeptime :: Float64 = 0.0
-    checkassumption :: Bool = false 
+    verbose :: Bool   = false          # whether to print intermediate results 
+    sleeptime :: Float64 = 0.0         # how long the exection sleeps when verbosing 
+    checkassumption :: Bool = false    # whether assumptions are being examined during execution
 end # BasicPars 
 
 @BasicPars mutable struct SimPars end 
@@ -65,21 +65,25 @@ currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) +
                                         Rational{Int}(startTime(sim))
 
 "dummy stepping function for arbitrary agents"
-dummystep(::AbstractAgent,::AbstractABM,
-            sim::AbsFixedStepSim=DefaultFixedStepSim()) = nothing 
+dummystep(::AbstractAgent,::AbstractABM;
+            simulator::AbsFixedStepSim=DefaultFixedStepSim(), 
+            example::AbstractExample = DefaultExample()) = nothing 
                                          
 "default dummy model stepping function"
-dummystep(::AbstractABM,
-            sim::AbsFixedStepSim=DefaultFixedStepSim()) = nothing 
+dummystep(::AbstractABM;
+            simulator::AbsFixedStepSim=DefaultFixedStepSim(),
+            example::AbstractExample = DefaultExample()) = nothing 
                                         
 "Default agent stepping function for reminding the client that it should be provided"
-errorstep(::AbstractAgent,::AbstractABM,
-            sim::AbsFixedStepSim=DefaultFixedStepSim()) = 
+errorstep(::AbstractAgent,::AbstractABM;
+            simulator::AbsFixedStepSim=DefaultFixedStepSim(),
+            example::AbstractExample = DefaultExample()) = 
                 error("agent stepping function has not been specified")
                                         
 "Default model stepping function for reminding the client that it should be provided"
-errorstep(::AbstractABM,
-            sim::AbsFixedStepSim=DefaultFixedStepSim()) = 
+errorstep(::AbstractABM;
+            simulator::AbsFixedStepSim=DefaultFixedStepSim(),
+            example::AbstractExample = DefaultExample()) = 
                 error("model stepping function has not been specified")
                                         
 
@@ -167,30 +171,44 @@ end
 
 prestep!(model::AbstractABM,::DefaultFixedStepSim) = nothing 
 
-function apply_agent_step!(model,agent_step!::Function,::DefaultFixedStepSim) 
+function apply_agent_step!(model,
+                            agent_step!::Function,
+                            ::DefaultFixedStepSim,
+                            ::DefaultExample) 
     for agent in allagents(model)
         agent_step!(agent,model) 
     end
     nothing 
 end
 
-function apply_agent_step!(model,agent_step!::Function,sim::AbsFixedStepSim) 
+function apply_agent_step!(model,
+                            agent_step!::Function,
+                            sim::AbsFixedStepSim,
+                            ex::AbstractExample) 
     for agent in allagents(model)
-        agent_step!(agent,model,sim) 
+        agent_step!(agent,model,simulator=sim,example=ex) 
     end
     nothing 
 end
 
-apply_agent_step!(model,agent_steps::Vector{Function},sim::AbsFixedStepSim) = 
+apply_agent_step!(model,
+                    agent_steps::Vector{Function},
+                    sim::AbsFixedStepSim,
+                    ex::AbstractExample) = 
     for k in 1:length(agent_steps) 
-        apply_agent_step!(model,agent_steps[k],sim)
+        apply_agent_step!(model,agent_steps[k],sim,ex)
     end 
 
-apply_model_step!(model,model_step!::Function,::DefaultFixedStepSim) = model_step!(model) 
-apply_model_step!(model,model_step!::Function,sim::AbsFixedStepSim) = model_step!(model,sim) 
-apply_model_step!(model,model_steps::Vector{Function},sim::AbsFixedStepSim) = 
+apply_model_step!(model,model_step!::Function,
+                    ::DefaultFixedStepSim,::DefaultExample) = model_step!(model) 
+apply_model_step!(model,model_step!::Function,sim::AbsFixedStepSim,ex::AbstractExample) = 
+                    model_step!(model,simulator=sim,example=ex) 
+apply_model_step!(model,
+                    model_steps::Vector{Function},
+                    sim::AbsFixedStepSim,
+                    ex::AbstractExample) = 
     for k in 1:length(model_steps) 
-        apply_model_step!(model,model_steps[k],sim)
+        apply_model_step!(model,model_steps[k],sim,ex)
     end
 
 
@@ -202,12 +220,14 @@ Stepping function for a model of type AgentBasedModel with
     agents_first : agent_step! executed first before model_step
 """
 function step!(model::AbstractABM,
-                agent_step!, sim::AbsFixedStepSim=DefaultFixedStepSim(); 
+                agent_step!; 
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample(),
                 n::Int=1)
 
     for _ in 1:n 
-        prestep!(model,sim)
-        apply_agent_step!(model,agent_step!,sim)
+        prestep!(model,simulator)
+        apply_agent_step!(model,agent_step!,simulator,example)
     end
 
     nothing 
@@ -221,33 +241,35 @@ function prerun!(model,sim)::Int
 end
 
 function run!(model::AbstractABM,
-                agent_step!, 
-                sim::AbsFixedStepSim=DefaultFixedStepSim())
+                agent_step!; 
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample())
     nsteps = prerun!(model,sim)
-    step!(model,agent_step!,sim,n=nsteps) 
+    step!(model,agent_step!,simulator=simulator,example=example,n=nsteps) 
     nothing 
 end 
 
 
 function step!(model::AbstractABM,
                 agent_step!,
-                model_step!,
-                sim::AbsFixedStepSim=DefaultFixedStepSim();  
+                model_step!;
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample(),  
                 n::Int=1,
                 agents_first::Bool=true ) 
     
     for _ in 1:n 
 
-        prestep!(model,sim)
+        prestep!(model,simulator)
 
         if agents_first 
-            apply_agent_step!(model,agent_step!,sim) 
+            apply_agent_step!(model,agent_step!,simulator,example) 
         end
     
-        apply_model_step!(model,model_step!,sim)
+        apply_model_step!(model,model_step!,simulator,example)
     
         if !agents_first
-            apply_agent_step!(model,agent_step!,sim)
+            apply_agent_step!(model,agent_step!,simulator,example)
         end
         
     end 
@@ -263,25 +285,27 @@ Run a fixed step ABM simulation using stepping functions
 """
 function run!(model::AbstractABM,
               agent_step!,
-              model_step!,
-              sim::AbsFixedStepSim) 
-    nsteps = prerun!(model,sim)
-    step!(model,agent_step!,model_step!,sim,n=nsteps) 
+              model_step!;
+              simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+              example::AbstractExample = DefaultExample()) 
+    nsteps = prerun!(model,simulator)
+    step!(model,agent_step!,model_step!,simulator=simulator,example=example,n=nsteps) 
     nothing 
 end 
 
 function step!(model::AbstractABM,
-                pre_model_step!, agent_step!, post_model_step!,
-                sim::AbsFixedStepSim = DefaultFixedStepSim(); 
+                pre_model_step!, agent_step!, post_model_step!;
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample(), 
                 n::Int=1) 
 
     for _ in 1:n
 
         prestep!(model,sim)
         
-        apply_model_step!(model,pre_model_step!,sim)
-        apply_agent_step!(model,agent_step!,sim)
-        apply_model_step!(model,post_model_step!,sim)
+        apply_model_step!(model,pre_model_step!,simulator,example)
+        apply_agent_step!(model,agent_step!,simulator,example)
+        apply_model_step!(model,post_model_step!,simulator,example)
 
     end
     
@@ -289,26 +313,29 @@ function step!(model::AbstractABM,
 end
 
 function run!(model::AbstractABM,
-                pre_model_step!, agent_step!, post_model_step!,
-                sim::AbsFixedStepSim) 
-    nsteps = prerun!(model,sim) 
-    step!(model,pre_model_step!, agent_step!, post_model_step!,sim,n=nsteps)  
+                pre_model_step!, agent_step!, post_model_step!;
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample())
+    nsteps = prerun!(model,simulator) 
+    step!(model,pre_model_step!, agent_step!, post_model_step!,
+            simulator=simulator,example=example,n=nsteps)  
     nothing 
 end 
 
 function step!(model::AbstractABM,
                 pre_model_steps::Vector{Function}, 
                 agent_steps::Vector{Function}, 
-                post_model_steps::Vector{Function},
-                sim::AbsFixedStepSim = DefaultFixedStepSim(); 
+                post_model_steps::Vector{Function};
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample(), 
                 n::Int=1) 
 
     for _ in 1:n
 
-        prestep!(model,sim)
-        apply_model_step!(model,pre_model_steps,sim)
-        apply_agent_step!(model,agent_steps,sim)
-        apply_model_step!(model,post_model_steps,sim)
+        prestep!(model,simulator)
+        apply_model_step!(model,pre_model_steps,simulator,example)
+        apply_agent_step!(model,agent_steps,simulator,example)
+        apply_model_step!(model,post_model_steps,simulator,example)
 
     end
 
@@ -317,11 +344,13 @@ end
 
 function run!(model::AbstractABM,
                 pre_model_steps::Vector{Function}, 
-                agent_steps::Vector{Function}, 
-                post_model_steps::Vector{Function},
-                sim::AbsFixedStepSim) 
-    nsteps =  prerun!(model,sim)
-    step!(model,pre_model_steps, agent_steps, post_model_steps,sim,n=nsteps)
+                agent_steps::Vector{Function},
+                post_model_steps::Vector{Function};
+                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                example::AbstractExample = DefaultExample())
+    nsteps =  prerun!(model,simulator)
+    step!(model,pre_model_steps, agent_steps, post_model_steps,
+            simulator = simulator, example = example, n=nsteps)
     nothing 
 end 
 

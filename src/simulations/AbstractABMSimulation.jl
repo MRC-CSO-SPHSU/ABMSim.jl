@@ -60,9 +60,16 @@ function attach_post_model_step!(simulation::AbstractABMSimulation,
     nothing
 end 
 
-step!(model::AbstractABM,sim::AbstractABMSimulation;n::Int=1) = 
-    step!(model,sim.pre_model_steps,sim.agent_steps,sim.post_model_steps,sim,n=n)
+step!(model::AbstractABM;
+    simulator::AbstractABMSimulation,
+    example::AbstractExample = DefaultExample(),
+    n::Int=1) = 
+        step!(model,sim.pre_model_steps,sim.agent_steps,sim.post_model_steps,
+                simulator=simulator,example=example,n=n)
 
-run!(model::AbstractABM, sim::AbstractABMSimulation) = 
-    run!(model,sim.pre_model_steps,sim.agent_steps,sim.post_model_steps,sim)
+run!(model::AbstractABM; 
+        simulator::AbstractABMSimulation,
+        example::AbstractExample = DefaultExample())   = 
+    run!(model,sim.pre_model_steps,sim.agent_steps,sim.post_model_steps,
+            simulator=simulator,example=example)
 

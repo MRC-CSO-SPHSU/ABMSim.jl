@@ -159,7 +159,7 @@ include("./datatypes.jl")
         
     end 
 
-       
+#=       
     @testset verbose=true "Simulating an ABM with a simple simulator" begin 
 
         pop = ABM{Person}()
@@ -449,7 +449,7 @@ include("./datatypes.jl")
                 startTime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
-
+=# 
 end  # testset MultiAgents components 
 
 nothing
