@@ -125,31 +125,6 @@ Other potential functions
 genocide(model::ABM): kill all agents 
 =# 
 
-#= 
-"""
-Stepping function for a model of type AgentBasedModel with 
-    agent_step!(agentObj,modelObj::AgentBasedModel) 
-    model_step!(modelObj::AgentBasedModel)
-    n::number of steps 
-    agents_first : agent_step! executed first before model_step
-"""
-function step!(
-    model::AbstractABM,
-    agent_step!,
-    n::Int=1
-)
-    for _ in 1:n 
-        for agent in allagents(model)
-            agent_step!(agent,model) 
-        end
-    end 
-    nothing 
-end
-
-=# 
-
-
-
 "ensure symmetry when initializing ABMs via their declaration"
 initial_connect!(abm2::T2,
                  abm1::T1,
