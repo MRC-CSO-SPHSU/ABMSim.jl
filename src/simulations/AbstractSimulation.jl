@@ -184,6 +184,16 @@ end
 function apply_agent_step!(model,
                             agent_step!::Function,
                             sim::AbsFixedStepSim,
+                            ::DefaultExample) 
+    for agent in allagents(model)
+        agent_step!(agent,model,simulator=sim) 
+    end
+    nothing 
+end
+
+function apply_agent_step!(model,
+                            agent_step!::Function,
+                            sim::AbsFixedStepSim,
                             ex::AbstractExample) 
     for agent in allagents(model)
         agent_step!(agent,model,simulator=sim,example=ex) 
@@ -200,9 +210,15 @@ apply_agent_step!(model,
     end 
 
 apply_model_step!(model,model_step!::Function,
-                    ::DefaultFixedStepSim,::DefaultExample) = model_step!(model) 
+                    ::DefaultFixedStepSim,::DefaultExample) = model_step!(model)
+
+apply_model_step!(model,model_step!::Function,
+                    sim::AbsFixedStepSim,
+                    ::DefaultExample) = model_step!(model,simulator=sim)
+
 apply_model_step!(model,model_step!::Function,sim::AbsFixedStepSim,ex::AbstractExample) = 
                     model_step!(model,simulator=sim,example=ex) 
+                    
 apply_model_step!(model,
                     model_steps::Vector{Function},
                     sim::AbsFixedStepSim,
@@ -301,7 +317,7 @@ function step!(model::AbstractABM,
 
     for _ in 1:n
 
-        prestep!(model,sim)
+        prestep!(model,simulator)
         
         apply_model_step!(model,pre_model_step!,simulator,example)
         apply_agent_step!(model,agent_step!,simulator,example)
