@@ -5,11 +5,10 @@ Specification of an abstract ABM type as a supertype for all
 """
 
 using  MultiAgents.Util: removeFirst!
-import Base.time 
 import Random.seed!
 
 export AbstractABM 
-export allagents, nagents, time
+export allagents, nagents
 export add_agent!, move_agent!, kill_agent!
 export verifyAgentsJLContract
 
@@ -31,8 +30,6 @@ function verifyAgentsJLContract(model::AbstractABM)
 end
 
 verifyMAJLContract(model::AbstractABM) = error("to implement")
-
-time(model::AbstractABM) = model.t
 
 # The following part is to be seperated in an another file, to be excluded
 # when agents.jl is used 
@@ -127,31 +124,6 @@ Other potential functions
 
 genocide(model::ABM): kill all agents 
 =# 
-
-#= 
-"""
-Stepping function for a model of type AgentBasedModel with 
-    agent_step!(agentObj,modelObj::AgentBasedModel) 
-    model_step!(modelObj::AgentBasedModel)
-    n::number of steps 
-    agents_first : agent_step! executed first before model_step
-"""
-function step!(
-    model::AbstractABM,
-    agent_step!,
-    n::Int=1
-)
-    for _ in 1:n 
-        for agent in allagents(model)
-            agent_step!(agent,model) 
-        end
-    end 
-    nothing 
-end
-
-=# 
-
-
 
 "ensure symmetry when initializing ABMs via their declaration"
 initial_connect!(abm2::T2,
