@@ -36,6 +36,7 @@ verbose(sim::AbstractSimulation)    = sim.parameters.verbose
     verbose :: Bool   = false          # whether to print intermediate results 
     sleeptime :: Float64 = 0.0         # how long the exection sleeps when verbosing 
     checkassumption :: Bool = false    # whether assumptions are being examined during execution
+    logfile  :: String = "log.tsv"
 end # BasicPars 
 
 @BasicPars mutable struct SimPars end 
