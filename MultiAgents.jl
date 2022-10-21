@@ -2,7 +2,7 @@ module MultiAgents
 
     export initMultiAgents, MAVERSION
 
-    const MAVERSION = v"0.2.4"
+    const MAVERSION = v"0.3"
 
     include("src/Util.jl")
 
@@ -20,9 +20,6 @@ module MultiAgents
     include("src/simulations/AbstractSimulation.jl")
     include("src/simulations/AbstractABMSimulation.jl")
     include("src/simulations/ABMSimulation.jl")
-
-    include("src/simulations/AbstractMABMSimulation.jl")
-    include("src/simulations/MABMSimulation.jl") 
 
     function initMultiAgents()
         resetIDCOUNTER()

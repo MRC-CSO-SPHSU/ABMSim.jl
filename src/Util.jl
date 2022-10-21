@@ -1,14 +1,17 @@
 module Util
 
-    export AbstractExample, DummyExample
+    export AbstractExample, DummyExample, DefaultExample 
 
     export removeFirst!, date2YearsMonths, getproperty 
 
     "A super type for all simulation examples"
     abstract type AbstractExample end 
 
-    "Default dummy example type"
+    "Dummy example type"
     struct DummyExample <: AbstractExample end 
+
+    "Default example type"
+    struct DefaultExample <: AbstractExample end 
 
     "remove first occurance of e in list"
     function removeFirst!(list, e)

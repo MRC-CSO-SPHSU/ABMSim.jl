@@ -9,16 +9,20 @@ export AbstractABMSimulation
 export attach_agent_step!, attach_pre_model_step!, attach_post_model_step!
 export setup!, step!, run! 
 
-"Abstract type for ABMs" 
-abstract type AbstractABMSimulation <: AbstractSimulation end 
+# export defaultprestep!, defaultpoststep!
 
+"Abstract type for ABMs" 
+abstract type AbstractABMSimulation <: AbsFixedStepSim end
+ 
 """
     default setup the simulation stepping functions in the constructor 
     This guarantees that the client provides proper stepping functions 
     either by overloading this method or other explicit ways 
 """
-setup!(::AbstractABMSimulation,::AbstractExample) = nothing  
+setup!(sim::AbstractABMSimulation,::AbstractExample) = 
+    error("setup! function for $(typeof(sim)) should be implemented")  
 
+#=  TODO update with sim.parameters 
 "get a symbol property from a Simulation"
 Base.getproperty(sim::AbstractABMSimulation,property::Symbol) = 
     property ∈ fieldnames(typeof(sim)) ?
@@ -31,9 +35,8 @@ Base.setproperty!(sim::AbstractABMSimulation,property::Symbol,val) =
         Base.setfield!(sim,property,val) : 
         sim.properties[property] = val
 
+=# 
 
-# attaching a stepping function is done via a function call, 
-# since data structure is subject to change, e.g. Vector{Function}
 
 "attach an agent step function to the simulation"
 function attach_agent_step!(simulation::AbstractABMSimulation,
@@ -57,18 +60,22 @@ function attach_post_model_step!(simulation::AbstractABMSimulation,
     nothing
 end 
 
-"step a simulation"
-step!(simulation::AbstractABMSimulation,
-      n::Int=1) = step!(simulation,
-                        simulation.pre_model_steps, 
-                        simulation.agent_steps,
-                        simulation.post_model_steps,
-                        n)
+step!(model::AbstractABM,
+    simulator::AbstractABMSimulation,
+    example::AbstractExample = DefaultExample();
+    n::Int=1) = 
+        step!(model,simulator.pre_model_steps,
+                    simulator.agent_steps,
+                    simulator.post_model_steps,
+                simulator,
+                example,n=n)
 
-"Run a simulation of an ABM"
-run!(simulation::AbstractABMSimulation) = 
-                run!(simulation, 
-                     simulation.pre_model_steps,
-                     simulation.agent_steps,
-                     simulation.post_model_steps)
+run!(model::AbstractABM, 
+        simulator::AbstractABMSimulation,
+        example::AbstractExample = DefaultExample())   = 
+    run!(model,simulator.pre_model_steps,
+               simulator.agent_steps,
+               simulator.post_model_steps,
+            simulator,
+            example)
 
