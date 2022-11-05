@@ -11,16 +11,18 @@ using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
 export dummystep, errorstep
 export dt, startTime, finishTime, seed, verbose, yearly
 export stepnumber, currstep
+export verifyMAJLContract
 
-export AbstractSimulation, AbsFixedStepSim, FixedStepSim, DefaultFixedStepSim
+export AbstractSimulation, AbsFixedStepSim, FixedStepSim, FixedStepSimT,
+        DefaultFixedStepSim
 export initFixedStepSim!, initFixedStepSimPars!
 
 abstract type AbstractSimulation end 
 
-startTime(sim::AbstractSimulation)  = sim.parameters.startTime
-finishTime(sim::AbstractSimulation) = sim.parameters.finishTime
-seed(sim::AbstractSimulation)       = sim.parameters.seed
-verbose(sim::AbstractSimulation)    = sim.parameters.verbose 
+startTime(sim::AbstractSimulation)  = startTime(sim.parameters)
+finishTime(sim::AbstractSimulation) = finishTime(sim.parameters)
+seed(sim::AbstractSimulation)       = seed(sim.parameters) 
+verbose(sim::AbstractSimulation)    = verbose(sim.parameters) 
 
 
 # sleeptime(sim::AbstractSimulation)  = sim.parameters.sleeptime
@@ -41,15 +43,25 @@ end # BasicPars
 
 @BasicPars mutable struct SimPars end 
 
+startTime(parameters) = parameters.startTime 
+finishTime(parameters) = parameters.finishTime
+seed(parameters) = hasfield(typeof(parameters),:seed) ? parameters.seed : 0  
+verbose(parameters) = hasfield(typeof(parameters),:verbose) && parameters.verbose 
+
+
 "Initialize default properties"
 function initSimPars!(sim::AbstractSimulation;
                                 startTime, finishTime,
                                 seed=0, verbose=false) 
 
-    sim.parameters.seed       = seed 
+    if(hasfield(typeof(sim.parameters),:seed)) 
+        sim.parameters.seed       = seed 
+    end 
     sim.parameters.startTime  = startTime
     sim.parameters.finishTime = finishTime
-    sim.parameters.verbose    = verbose 
+    if(hasfield(typeof(sim.parameters),:verbose)) 
+        sim.parameters.verbose    = verbose 
+    end
     # sim.time = Rational{Int}(startTime)
 
     nothing  
@@ -57,13 +69,30 @@ end
 
 abstract type AbsFixedStepSim <: AbstractSimulation end
 
-struct DefaultFixedStepSim <: AbsFixedStepSim end 
 
-dt(sim::AbsFixedStepSim)            = sim.parameters.dt 
-yearly(sim::AbsFixedStepSim)        = sim.parameters.yearly
+dt(sim::AbsFixedStepSim)            = dt(sim.parameters)
+yearly(sim::AbsFixedStepSim)        = yearly(sim.parameters)
 stepnumber(sim::AbsFixedStepSim)    = sim.stepnumber
 currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) + 
                                         Rational{Int}(startTime(sim))
+
+function verifyMAJLContract(sim::AbsFixedStepSim) 
+    try 
+        dt(sim)
+        currstep(sim) 
+        stepnumber(sim)
+        # Other parameter fields used within MA.jl 
+    catch e 
+        println(e) 
+        return false 
+    end 
+    return true 
+end 
+
+# for simulations agents.jl-way 
+# Just as a trait, since the above accessory functions are not needed
+struct DefaultFixedStepSim <: AbsFixedStepSim end   
+                              
 
 "dummy stepping function for arbitrary agents"
 dummystep(::AbstractAgent,::AbstractABM,
@@ -95,13 +124,20 @@ end
 
 @BasicPars @FixedStepPars mutable struct FixedStepSimPars end
 
+dt(parameters) = parameters.dt 
+yearly(parameters) = hasfield(typeof(parameters),:yearly) && parameters.yearly
+
 function initFixedStepSimPars!(simPars::FixedStepSimPars,pars) 
     if !(fieldnames(typeof(pars)) ⊆ fieldnames(FixedStepSimPars))  
-        throw(ArgumentError("$(fieldnames(typeof(pars))) has fields not present in $(fieldnames(FixedStepSimPars))")) 
+        #throw(ArgumentError("$(fieldnames(typeof(pars))) has fields not present in $(fieldnames(FixedStepSimPars))"))
+        @warn "$(fieldnames(typeof(pars))) has fields not present in $(fieldnames(FixedStepSimPars))" 
     end
     for sym in fieldnames(typeof(pars))
-        val = getproperty(pars,sym)
-        setproperty!(simPars,sym,val)
+        # @info "$sym and $(hasfield(FixedStepSimPars,sym))"
+        if(hasfield(FixedStepSimPars,sym))
+            val = getproperty(pars,sym)
+            setproperty!(simPars,sym,val)
+        end
     end
     nothing 
 end
@@ -117,12 +153,32 @@ function initFixedStepSim!(sim::AbsFixedStepSim;
                             seed=seed, verbose=verbose)
 
     sim.parameters.dt       = dt
-    sim.parameters.yearly   = yearly
+    if hasfield(typeof(sim.parameters),:yearly)
+        sim.parameters.yearly   = yearly
+    end 
     sim.stepnumber          = 0
 
     nothing 
 end 
 
+mutable struct FixedStepSimT{SimParType} <: AbsFixedStepSim
+    parameters::SimParType  
+    stepnumber::Int 
+
+    function FixedStepSimT{SimParType}(simpar::SimParType) where SimParType 
+        sim = new(simpar,0)
+        verifyMAJLContract(sim)
+        sim 
+    end
+end
+
+const FixedStepSim = FixedStepSimT{FixedStepSimPars}
+
+FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) = 
+    FixedStepSim( FixedStepSimPars( dt=dt, 
+                            startTime = startTime, finishTime = finishTime,
+                            seed = seed , verbose = verbose, yearly = yearly )) 
+#=
 mutable struct FixedStepSim <: AbsFixedStepSim
     parameters::FixedStepSimPars 
     stepnumber::Int 
@@ -138,6 +194,7 @@ mutable struct FixedStepSim <: AbsFixedStepSim
         sim
     end 
 end
+=# 
 
 function verboseStep(sim::AbsFixedStepSim) 
     (year,month) = date2YearsMonths(currstep(sim)) 
@@ -251,7 +308,7 @@ function step!(model::AbstractABM,
 end 
 
 function prerun!(model,sim)::Int  
-    if Random.GLOBAL_SEED != seed(sim) 
+    if hasfield(typeof(sim.parameters),:seed) && Random.GLOBAL_SEED != seed(sim) 
         seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
     end 
     trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
