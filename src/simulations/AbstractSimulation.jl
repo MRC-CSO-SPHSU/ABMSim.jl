@@ -178,23 +178,6 @@ FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) =
     FixedStepSim( FixedStepSimPars( dt=dt, 
                             startTime = startTime, finishTime = finishTime,
                             seed = seed , verbose = verbose, yearly = yearly )) 
-#=
-mutable struct FixedStepSim <: AbsFixedStepSim
-    parameters::FixedStepSimPars 
-    stepnumber::Int 
-
-    FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) = 
-        new( FixedStepSimPars( dt=dt, 
-                startTime = startTime, finishTime = finishTime,
-                seed = seed , verbose = verbose, yearly = yearly ), 0) 
-    
-    function FixedStepSim(pars) 
-        sim = new(FixedStepSimPars(),0)
-        initFixedStepSim!(sim,pars)
-        sim
-    end 
-end
-=# 
 
 function verboseStep(sim::AbsFixedStepSim) 
     (year,month) = date2YearsMonths(currstep(sim)) 
