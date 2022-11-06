@@ -13,7 +13,7 @@ export dt, startTime, finishTime, seed, verbose, yearly
 export stepnumber, currstep
 export verifyMAJLContract
 
-export AbstractSimulation, AbsFixedStepSim, FixedStepSim, FixedStepSimT,
+export AbstractSimulation, AbsFixedStepSim, FixedStepSim, FixedStepSimP,
         DefaultFixedStepSim
 export initFixedStepSim!, initFixedStepSimPars!
 
@@ -161,18 +161,18 @@ function initFixedStepSim!(sim::AbsFixedStepSim;
     nothing 
 end 
 
-mutable struct FixedStepSimT{SimParType} <: AbsFixedStepSim
+mutable struct FixedStepSimP{SimParType} <: AbsFixedStepSim
     parameters::SimParType  
     stepnumber::Int 
 
-    function FixedStepSimT{SimParType}(simpar::SimParType) where SimParType 
+    function FixedStepSimP{SimParType}(simpar::SimParType) where SimParType 
         sim = new(simpar,0)
         verifyMAJLContract(sim)
         sim 
     end
 end
 
-const FixedStepSim = FixedStepSimT{FixedStepSimPars}
+const FixedStepSim = FixedStepSimP{FixedStepSimPars}
 
 FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) = 
     FixedStepSim( FixedStepSimPars( dt=dt, 

@@ -18,7 +18,7 @@ using MultiAgents: kill_agent!, seed!, nagents
 using MultiAgents: step!, errorstep, dummystep, run! 
 using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose, yearly 
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, 
-                    FixedStepSim, FixedStepSimT,
+                    FixedStepSim, FixedStepSimP,
                     ABMSimulation
 using MultiAgents: initFixedStepSim!               
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
@@ -188,10 +188,10 @@ include("./datatypes.jl")
             SimPars2() = new(1//12,1980,1990)
         end 
 
-        simulator3 = FixedStepSimT{SimPars1}(SimPars1())
+        simulator3 = FixedStepSimP{SimPars1}(SimPars1())
         @test !verifyMAJLContract(simulator3)
 
-        simulator = FixedStepSimT{SimPars2}(SimPars2())
+        simulator = FixedStepSimP{SimPars2}(SimPars2())
         initFixedStepSim!(simulator2,SimPars2())
 
         @test verifyMAJLContract(simulator2)
