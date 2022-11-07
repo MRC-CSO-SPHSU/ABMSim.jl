@@ -12,17 +12,20 @@ using Test
 
 # agents 
 
-using MultiAgents: initMultiAgents, verifyAgentsJLContract,  MAVERSION
+using MultiAgents: initMultiAgents, MAVERSION, 
+                    verifyMAJLContract, verifyAgentsJLContract 
 using MultiAgents: kill_agent!, seed!, nagents
 using MultiAgents: step!, errorstep, dummystep, run! 
-using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose
-using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, FixedStepSim, ABMSimulation
+using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose, yearly 
+using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, 
+                    FixedStepSim, FixedStepSimP,
+                    ABMSimulation
 using MultiAgents: initFixedStepSim!               
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 initMultiAgents()
-@assert MAVERSION == v"0.3"
+@assert MAVERSION == v"0.3.1"
 
 include("./datatypes.jl")
 
@@ -174,7 +177,9 @@ include("./datatypes.jl")
             SimPars1() = new(1980,false)
         end 
 
-        @test_throws ArgumentError initFixedStepSim!(simulator2,SimPars1())
+        @test_logs (:warn,r".*present.*") initFixedStepSim!(simulator2,SimPars1())
+
+        @test verifyMAJLContract(simulator2)
 
         mutable struct SimPars2 
             dt
@@ -183,9 +188,13 @@ include("./datatypes.jl")
             SimPars2() = new(1//12,1980,1990)
         end 
 
+        simulator3 = FixedStepSimP{SimPars1}(SimPars1())
+        @test !verifyMAJLContract(simulator3)
+
+        simulator = FixedStepSimP{SimPars2}(SimPars2())
         initFixedStepSim!(simulator2,SimPars2())
-        
-        simulator = FixedStepSim(SimPars2())
+
+        @test verifyMAJLContract(simulator2)
 
         @test currstep(simulator2) == 1980 // 1 == currstep(simulator)
         @test dt(simulator2) == 1 // 12 == dt(simulator)
