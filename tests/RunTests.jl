@@ -25,7 +25,7 @@ using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 initMultiAgents()
-@assert MAVERSION == v"0.3.1"
+@assert MAVERSION == v"0.3.2"
 
 include("./datatypes.jl")
 
@@ -378,7 +378,7 @@ include("./datatypes.jl")
                             
         @test 1990 == currstep(simulator)
         @test stepnumber(simulator) == 120 
-        @test share1.price != price 
+        @test share1.price !=  price 
         
         initFixedStepSim!(simulator, dt= 1 // 12, 
                             startTime = 1990 ,
