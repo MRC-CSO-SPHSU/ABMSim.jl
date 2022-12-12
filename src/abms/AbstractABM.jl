@@ -4,12 +4,13 @@ Specification of an abstract ABM type as a supertype for all
     from Agents.jl
 """
 
-using  MultiAgents.Util: removeFirst!
+using  MultiAgents.Util: removeFirst!, removeFirstOpt!
 import Random.seed!
 
 export AbstractABM 
 export allagents, nagents
-export add_agent!, move_agent!, kill_agent!
+export add_agent!, move_agent!, kill_agent!, kill_agent_opt!, 
+        kill_agent_at!, kill_agent_at_opt!
 export verifyAgentsJLContract
 
 
@@ -76,7 +77,7 @@ seed!(model::AbstractABM,seed) =
     seed == 0 ? seed!(floor(Int,time())) : seed!(seed)
 
 
-"numbe of  agents"
+"number of agents"
 nagents(model::AbstractABM) = length(allagents(model))
  
 
@@ -116,8 +117,28 @@ move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 "remove an agent"
 kill_agent!(agent,model::AbstractABM) = removeFirst!(allagents(model),agent)
 
+kill_agent_opt!(agent, model::AbstractABM) = 
+    removeFirstOpt!(allagents(model), agent)
+
+kill_agent!(id::Int, model::AbstractABM) = kill_agent!(model[id],model)
+
+function kill_agent_at!(id::Int,model::AbstractABM)
+    deleteat!(allagents(model),id) 
+    nothing
+end 
+
+function kill_agent_at_opt!(id::Int,model::AbstractABM) 
+    agents = allagents(model)
+    len = length(agents)
+    (agents[id], agents[len]) = (agents[len],agents[id])
+    deleteat!(agents,len)
+    nothing 
+end 
+
+
 "symmety"
 kill_agent!(model::AbstractABM,agent) = kill_agent!(agent,model)
+kill_agent_opt!(model::AbstractABM,agent) = kill_agent_opt!(agent,model)
 
 #=
 Other potential functions 

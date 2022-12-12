@@ -2,7 +2,7 @@ module Util
 
     export AbstractExample, DummyExample, DefaultExample 
 
-    export removeFirst!, date2YearsMonths, getproperty 
+    export removeFirst!, removeFirstOpt!, date2YearsMonths, getproperty 
 
     "A super type for all simulation examples"
     abstract type AbstractExample end 
@@ -17,6 +17,14 @@ module Util
     function removeFirst!(list, e)
         e ∉ list ? throw(ArgumentError("element $(e) not in $(list)")) : nothing 
         deleteat!(list, findfirst(x -> x == e, list)) 
+        nothing 
+    end
+
+    function removeFirstOpt!(list,e) 
+        idx = findfirst(x -> x == e, list) 
+        len = length(list)
+        (list[len], list[idx]) = (list[idx], list[len]) 
+        deleteat!(list,len)
         nothing 
     end
 

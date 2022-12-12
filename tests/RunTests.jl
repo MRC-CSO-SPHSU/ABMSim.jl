@@ -14,7 +14,9 @@ using Test
 
 using MultiAgents: initMultiAgents, MAVERSION, 
                     verifyMAJLContract, verifyAgentsJLContract 
-using MultiAgents: kill_agent!, seed!, nagents
+using MultiAgents: kill_agent!, kill_agent_opt!, 
+                    kill_agent_at!, kill_agent_at_opt!,   
+                    seed!, nagents
 using MultiAgents: step!, errorstep, dummystep, run! 
 using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose, yearly 
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, 
@@ -60,13 +62,34 @@ include("./datatypes.jl")
         @test !verifyAgentsJLContract(population)
 
         person2 = population[1]
-        kill_agent!(person2,population)
+        kill_agent_opt!(person2,population)
         @test verifyAgentsJLContract(population)
 
+        # As an explaination, person2 has been added twice to the pop. 
         @test population[1].id == person2.id 
 
         kill_agent!(population[1],population)
         @test nagents(population) == 4
+
+        add_agent!(person2, population) 
+        @test nagents(population) == 5 
+        @test population[1] == person2 
+
+        kill_agent!(1,population)               # kill the agent with id 1 
+        @test population.agentsList[1].id == 5  # person with id 5 was moved to the first 
+        @test nagents(population) == 4 
+
+        person_idx5 = population.agentsList[1]  
+        kill_agent_at!(1,population) 
+        @test population.agentsList[1].id == 2
+        @test nagents(population) == 3
+        add_agent!(person_idx5, population)  
+
+        person_idx2 = population.agentsList[1]  
+        kill_agent_at_opt!(1,population) 
+        @test population.agentsList[1].id == population[5].id
+        @test nagents(population) == 3
+        add_agent!(person_idx2, population)
 
         @test_throws ArgumentError kill_agent!(person2,population)
         @test nagents(population) == 4
