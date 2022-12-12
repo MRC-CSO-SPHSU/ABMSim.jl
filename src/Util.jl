@@ -22,9 +22,8 @@ module Util
 
     function removeFirstOpt!(list,e) 
         idx = findfirst(x -> x == e, list) 
-        len = length(list)
-        (list[len], list[idx]) = (list[idx], list[len]) 
-        deleteat!(list,len)
+        list[idx] = list[length(list)] #(list[len], list[idx]) = (list[idx], list[len]) 
+        pop!(list)
         nothing 
     end
 

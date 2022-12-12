@@ -129,9 +129,8 @@ end
 
 function kill_agent_at_opt!(id::Int,model::AbstractABM) 
     agents = allagents(model)
-    len = length(agents)
-    (agents[id], agents[len]) = (agents[len],agents[id])
-    deleteat!(agents,len)
+    agents[id] = agents[length(agents)] #(agents[id], agents[len]) = (agents[len],agents[id])
+    pop!(agents) # deleteat!(agents,len)
     nothing 
 end 
 
