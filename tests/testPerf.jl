@@ -39,7 +39,12 @@ function killatAndAddAgent!(pop,M,killatfunc)
     nothing 
 end
 
+N = 10_000
+M = 210_000  # slowest version takes 1 sec. in my machine 
+
 population = randomABMPopulation(10_000)
+
+println(" storage for population : $(pretty_summarysize(population))") 
 
 @time killAndAddAgent!(population,210_000,kill_agent!) 
 @time killAndAddAgent!(population,210_000,kill_agent_opt!) 
