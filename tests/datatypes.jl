@@ -1,5 +1,5 @@
 using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
-using MultiAgents: AbstractXAgent, ABM, AbstractMABM  
+using MultiAgents: AbstractXAgent, ABMPDV, AbstractMABM  
 using MultiAgents: getIDCOUNTER, add_agent!
 
 mutable struct Person <: AbstractXAgent 
@@ -11,8 +11,12 @@ mutable struct Person <: AbstractXAgent
     Person(id,position,a::Rational{Int}) = new(id,position,a,10000.0)
 end 
 
+const PopulationABM = ABMPDV{Person,Nothing,Nothing,Nothing}
+const PopulationType = ABMPDV{Person,P,D,V} where {P,D,V}
+
+
 # List of persons 
-function createInvalidPopulation!(pop::ABM{Person}) 
+function createInvalidPopulation!(pop) 
 
     person1 = Person(1,"Edinbrugh",46//1) 
     person2 = person1               
@@ -33,7 +37,7 @@ end
 
 
 # List of persons 
-function createPopulation!(pop::ABM{Person}) 
+function createPopulation!(pop) 
 
     person1 = Person(1,"Edinbrugh",46//1)             
     person3 = Person(2,"Abderdeen",25 + 3 // 12) 
@@ -65,8 +69,8 @@ end
 
 mutable struct Demography <: AbstractMABM
 
-    pop :: ABM{Person}   # population 
-    shares :: ABM{Stock} # stocks 
+    pop :: PopulationABM   # population 
+    shares :: ABMPDV{Stock, Nothing, Nothing, Nothing} # stocks 
 
 end 
 
@@ -74,13 +78,11 @@ function Demography()
 
     seed!(floor(Int,time()))
 
-    population = ABM{Person}(parameters = nothing, 
-                             variables = nothing) 
+    population = PopulationABM()  
         
     createPopulation!(population)
     
-    stocks = ABM{Stock}(parameters = nothing,
-                        variables = nothing) 
+    stocks = ABMPDV{Stock,Nothing,Nothing,Nothing}() 
 
     for person in allagents(population)
         stock = Stock(person) 

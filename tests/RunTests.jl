@@ -27,7 +27,7 @@ using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 initMultiAgents()
-@assert MAVERSION == v"0.3.2"
+@assert MAVERSION == v"0.4"
 
 include("./datatypes.jl")
 
@@ -55,7 +55,7 @@ include("./datatypes.jl")
             PopVars(t) = new(0,t)
         end
 
-        population = ABM{Person}(variables = PopVars(1980 // 1))
+        population = ABMPDV{Person,Nothing,Nothing,PopVars}(PopVars(1980 // 1))
 
         createInvalidPopulation!(population)
 
@@ -103,7 +103,8 @@ include("./datatypes.jl")
 
     @testset verbose=true "pre-defined stepping functions of ABMs" begin
 
-        population = ABM{Person}(variables = PopVars(1980 // 1))
+        population = PopulationType{Nothing,Nothing,PopVars}(PopVars(1980 // 1))
+
         createPopulation!(population)
 
         person1 = population[1]
@@ -115,19 +116,20 @@ include("./datatypes.jl")
 
     end 
 
-    stepsize(population::ABM{Person}) = 1 // 12 
+   
+    stepsize(population::PopulationType) = 1 // 12 
 
-    age_step!(person::Person,model::ABM{Person},
+    age_step!(person::Person,model::PopulationType,
                 simulator::AbsFixedStepSim = DefaultFixedStepSim()) = 
         person.age += stepsize(model)
     
-    function population_step!(population::ABM{Person}) 
+    function population_step!(population::PopulationType) 
         population.variables.time += stepsize(population)
         population.variables.stepnumber += 1
         nothing 
     end
 
-    function age_step!(population::ABM{Person})
+    function age_step!(population::PopulationType)
         
         agents = allagents(population) 
         for person in agents 
@@ -137,13 +139,12 @@ include("./datatypes.jl")
 
     end 
 
-    prestep!(pop::ABM{Person}) = pop.variables.time += stepsize(pop)  
-    poststep!(pop::ABM{Person}) = pop.variables.stepnumber += 1
-
+    prestep!(pop::PopulationType) = pop.variables.time += stepsize(pop)  
+    poststep!(pop::PopulationType) = pop.variables.stepnumber += 1
 
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
 
-        population = ABM{Person}(variables = PopVars(1980 // 1))
+        population = PopulationType{Nothing,Nothing,PopVars}(PopVars(1980 // 1))
         createPopulation!(population)
         
         person1 = population[1]
@@ -185,9 +186,10 @@ include("./datatypes.jl")
         
     end 
 
+
     @testset verbose=true "Simulating an ABM with a simple simulator" begin 
 
-        pop = ABM{Person}()
+        pop = PopulationType{Nothing,Nothing,Nothing}()
         createPopulation!(pop)
 
         simulator2 = FixedStepSim(dt=1//12,
@@ -248,13 +250,14 @@ include("./datatypes.jl")
 
     end
 
-    incomeChange!(person::Person,pop::ABM{Person},::ABMSimulation) =  
+
+    incomeChange!(person::Person,pop,::ABMSimulation) =  
         person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier * person.income
     
-    age_step!(person::Person,pop::ABM{Person},simulator::ABMSimulation) = 
+    age_step!(person::Person,pop::PopulationType,simulator::ABMSimulation) = 
         person.age += dt(simulator)
 
-    function incomeAvg!(pop::ABM{Person},simulator::ABMSimulation) 
+    function incomeAvg!(pop::PopulationType,simulator::ABMSimulation) 
         ret = 0
         for person in allagents(pop)
             ret += person.income 
@@ -263,7 +266,6 @@ include("./datatypes.jl")
         verboseStep(pop.variables.averageIncome,"average income",simulator)  
         nothing 
     end 
-
 
     @testset verbose=true "Simulating an ABM with an ABM Simulation type" begin 
 
@@ -275,8 +277,7 @@ include("./datatypes.jl")
             averageIncome::Float64 
         end 
     
-        popWincome = ABM{Person}(parameters = IncomePars(0.01), 
-                                    variables = IncomeVar(0))
+        popWincome = PopulationType{IncomePars,Nothing,IncomeVar}(IncomePars(0.01),IncomeVar(0))
         createPopulation!(popWincome)
 
         @test_throws Exception  abmsim = 
@@ -310,7 +311,6 @@ include("./datatypes.jl")
 
     end
 
- 
     @testset verbose=true "Testing a MultiABM basic functionalities " begin 
 
         demography = Demography()
@@ -359,6 +359,7 @@ include("./datatypes.jl")
         @test demography.shares[1].price != pr
 
     end 
+
 
     function stock_step!(demography::Demography,sim::AbsFixedStepSim,
                             example :: AbstractExample = DefaultExample()) 
@@ -551,6 +552,8 @@ include("./datatypes.jl")
                 startTime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
+
+ 
 
 
 end  # testset MultiAgents components 
