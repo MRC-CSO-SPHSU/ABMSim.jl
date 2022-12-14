@@ -2,7 +2,7 @@ module Util
 
     export AbstractExample, DummyExample, DefaultExample 
 
-    export removeFirst!, removeFirstOpt!, date2YearsMonths, getproperty 
+    export remove_first!, remove_first_opt!, date2years_months, getproperty 
 
     "A super type for all simulation examples"
     abstract type AbstractExample end 
@@ -14,13 +14,13 @@ module Util
     struct DefaultExample <: AbstractExample end 
 
     "remove first occurance of e in list"
-    function removeFirst!(list, e)
+    function remove_first!(list, e)
         e ∉ list ? throw(ArgumentError("element $(e) not in $(list)")) : nothing 
         deleteat!(list, findfirst(x -> x == e, list)) 
         nothing 
     end
 
-    function removeFirstOpt!(list,e) 
+    function remove_first_opt!(list,e) 
         idx = findfirst(x -> x == e, list) 
         list[idx] = list[length(list)] 
         # len = length(list)
@@ -30,17 +30,15 @@ module Util
     end
 
     "convert date in rational representation to (years, months) as tuple"
-    function date2YearsMonths(date::Rational{Int})
+    function date2years_months(date::Rational{Int})
         date < 0 ? throw(ArgumentError("Negative age")) : nothing 
         12 % denominator(date) != 0 ? throw(ArgumentError("$(date) not in age format")) : nothing 
         years  = trunc(Int, numerator(date) / denominator(date)) 
         months = trunc(Int, numerator(date) % denominator(date) * 12 / denominator(date) )
-        (years , months)
+        return (years , months)
     end
-
 
     "Make dictionaries look like struct for symbols keys"
     Base.getproperty(d::Dict, s::Symbol) = s ∈ fieldnames(Dict) ? getfield(d, s) : getindex(d, s) 
-
 
 end # module Util 

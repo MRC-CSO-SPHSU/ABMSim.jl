@@ -23,7 +23,7 @@ mutable struct ABMSimulationP{SimParType} <: AbstractABMSimulation
         # abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
         abmsimulation = new(pars,[],[],[],0)
         setupEnabled ? setup!(abmsimulation,example) : nothing 
-        verifyMAJLContract(abmsimulation)
+        verify_majl(abmsimulation)
         abmsimulation 
     end
 
@@ -31,12 +31,12 @@ end # ABMSimulationP
 
 const ABMSimulation = ABMSimulationP{FixedStepSimPars}
 
-ABMSimulation(;dt, startTime, finishTime, 
+ABMSimulation(;dt, starttime, finishtime, 
 example=DefaultExample(),
 seed=0,verbose=false,yearly=false, 
 setupEnabled = true) = 
     ABMSimulation(FixedStepSimPars( dt=dt, 
-                                    startTime = startTime, finishTime = finishTime,
+                                    starttime = starttime, finishtime = finishtime,
                                     seed = seed, verbose = verbose, yearly = yearly), 
                     example = example,
                     setupEnabled = setupEnabled) 

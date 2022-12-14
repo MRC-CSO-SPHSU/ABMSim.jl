@@ -6,35 +6,28 @@ using Mixers
 using Parameters 
 using Random
 
-using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
+using MultiAgents.Util: date2years_months, AbstractExample, DefaultExample
 
 export dummystep, errorstep
-export dt, startTime, finishTime, seed, verbose, yearly
+export dt, starttime, finishtime, seed, verbose, yearly
 export stepnumber, currstep
-export verifyMAJLContract
+export verify_majl
 
 export AbstractSimulation, AbsFixedStepSim, FixedStepSim, FixedStepSimP,
         DefaultFixedStepSim
-export initFixedStepSim!, initFixedStepSimPars!
+export init_parameters!
 
 abstract type AbstractSimulation end 
 
-startTime(sim::AbstractSimulation)  = startTime(sim.parameters)
-finishTime(sim::AbstractSimulation) = finishTime(sim.parameters)
+starttime(sim::AbstractSimulation)  = starttime(sim.parameters)
+finishtime(sim::AbstractSimulation) = finishtime(sim.parameters)
 seed(sim::AbstractSimulation)       = seed(sim.parameters) 
 verbose(sim::AbstractSimulation)    = verbose(sim.parameters) 
 
-
-# sleeptime(sim::AbstractSimulation)  = sim.parameters.sleeptime
-
-# The following could be employed (undecided)
-#example(sim::AbstractSimulation)    = sim.example 
-# time(sim::AbstractSimulation)       = sim.time  
-
 @mix @with_kw struct BasicPars 
     seed :: Int       = 0
-    startTime :: Rational{Int}  = 0
-    finishTime :: Rational{Int} = 0 
+    starttime :: Rational{Int}  = 0
+    finishtime :: Rational{Int} = 0 
     verbose :: Bool   = false          # whether to print intermediate results 
     sleeptime :: Float64 = 0.0         # how long the exection sleeps when verbosing 
     checkassumption :: Bool = false    # whether assumptions are being examined during execution
@@ -43,40 +36,46 @@ end # BasicPars
 
 @BasicPars mutable struct SimPars end 
 
-startTime(parameters) = parameters.startTime 
-finishTime(parameters) = parameters.finishTime
+starttime(parameters) = parameters.starttime 
+finishtime(parameters) = parameters.finishtime
 seed(parameters) = hasfield(typeof(parameters),:seed) ? parameters.seed : 0  
 verbose(parameters) = hasfield(typeof(parameters),:verbose) && parameters.verbose 
 
 
+
 "Initialize default properties"
-function initSimPars!(sim::AbstractSimulation;
-                                startTime, finishTime,
-                                seed=0, verbose=false) 
+function _init_parameters!(sim, starttime, finishtime, seed=0, verbose=false) 
 
     if(hasfield(typeof(sim.parameters),:seed)) 
         sim.parameters.seed       = seed 
     end 
-    sim.parameters.startTime  = startTime
-    sim.parameters.finishTime = finishTime
+    sim.parameters.starttime  = starttime
+    sim.parameters.finishtime = finishtime
     if(hasfield(typeof(sim.parameters),:verbose)) 
         sim.parameters.verbose    = verbose 
     end
-    # sim.time = Rational{Int}(startTime)
+    # sim.time = Rational{Int}(starttime)
 
     nothing  
 end 
 
-abstract type AbsFixedStepSim <: AbstractSimulation end
+"Initialize default properties"
+init_parameters!(sim::AbstractSimulation;
+                            starttime, 
+                            finishtime,
+                            seed=0, 
+                            verbose=false) = 
+    _init_parameters(sim,starttime,finishtime,seed,verbose)
 
+
+abstract type AbsFixedStepSim <: AbstractSimulation end
 
 dt(sim::AbsFixedStepSim)            = dt(sim.parameters)
 yearly(sim::AbsFixedStepSim)        = yearly(sim.parameters)
 stepnumber(sim::AbsFixedStepSim)    = sim.stepnumber
 currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) + 
-                                        Rational{Int}(startTime(sim))
-
-function verifyMAJLContract(sim::AbsFixedStepSim) 
+                                        Rational{Int}(starttime(sim))
+function verify_majl(sim::AbsFixedStepSim) 
     try 
         dt(sim)
         currstep(sim) 
@@ -93,7 +92,6 @@ end
 # Just as a trait, since the above accessory functions are not needed
 struct DefaultFixedStepSim <: AbsFixedStepSim end   
                               
-
 "dummy stepping function for arbitrary agents"
 dummystep(::AbstractAgent,::AbstractABM,
             simulator::AbsFixedStepSim=DefaultFixedStepSim(), 
@@ -116,7 +114,6 @@ errorstep(::AbstractABM,
             example::AbstractExample = DefaultExample()) = 
                 error("model stepping function has not been specified")
                                         
-
 @mix @with_kw struct FixedStepPars 
     dt :: Rational{Int}     = 0 // 1  
     yearly :: Bool          = false   # doing some extra stuffs at the begining of every year
@@ -127,7 +124,7 @@ end
 dt(parameters) = parameters.dt 
 yearly(parameters) = hasfield(typeof(parameters),:yearly) && parameters.yearly
 
-function initFixedStepSimPars!(simPars::FixedStepSimPars,pars) 
+function init_parameters!(simPars::FixedStepSimPars,pars) 
     if !(fieldnames(typeof(pars)) ⊆ fieldnames(FixedStepSimPars))  
         #throw(ArgumentError("$(fieldnames(typeof(pars))) has fields not present in $(fieldnames(FixedStepSimPars))"))
         @warn "$(fieldnames(typeof(pars))) has fields not present in $(fieldnames(FixedStepSimPars))" 
@@ -142,22 +139,18 @@ function initFixedStepSimPars!(simPars::FixedStepSimPars,pars)
     nothing 
 end
  
-initFixedStepSim!(sim::AbsFixedStepSim,pars) = 
-    initFixedStepSimPars!(sim.parameters,pars)
+init_parameters!(sim::AbsFixedStepSim,pars) = 
+    init_parameters!(sim.parameters,pars)
 
-function initFixedStepSim!(sim::AbsFixedStepSim;
-                                dt, startTime, finishTime,
+function init_parameters!(sim::AbsFixedStepSim;
+                                dt, starttime, finishtime,
                                 seed=0, verbose=false, yearly=false) 
-
-    initSimPars!(sim;startTime=startTime, finishTime=finishTime,
-                            seed=seed, verbose=verbose)
-
+    _init_parameters!(sim, starttime, finishtime, seed, verbose)
     sim.parameters.dt       = dt
     if hasfield(typeof(sim.parameters),:yearly)
         sim.parameters.yearly   = yearly
     end 
     sim.stepnumber          = 0
-
     nothing 
 end 
 
@@ -167,35 +160,34 @@ mutable struct FixedStepSimP{SimParType} <: AbsFixedStepSim
 
     function FixedStepSimP{SimParType}(simpar::SimParType) where SimParType 
         sim = new(simpar,0)
-        verifyMAJLContract(sim)
+        verify_majl(sim)
         sim 
     end
 end
 
 const FixedStepSim = FixedStepSimP{FixedStepSimPars}
 
-FixedStepSim(;dt,startTime,finishTime,seed=0,verbose=false,yearly=false) = 
+FixedStepSim(;dt,starttime,finishtime,seed=0,verbose=false,yearly=false) = 
     FixedStepSim( FixedStepSimPars( dt=dt, 
-                            startTime = startTime, finishTime = finishTime,
+                            starttime = starttime, finishtime = finishtime,
                             seed = seed , verbose = verbose, yearly = yearly )) 
 
 function verboseStep(sim::AbsFixedStepSim) 
-    (year,month) = date2YearsMonths(currstep(sim)) 
+    (year,month) = date2years_months(currstep(sim)) 
     iteryear = "########################################"
     yearly(sim) && month == 0   ? 
-        println("conducting simulation step year $(year) \n$(iteryear)") : nothing 
+        println("$(iteryear)\n simulation step year $(year) \n$(iteryear)") : nothing 
     itermonth = "========================================================="
     yearly(sim) ? 
         nothing : 
-        println("conducting simulation step year $(year) month $(month+1) \n$(itermonth)")
-                  
+        println("$(itermonth)\n simulation step year $(year) month $(month+1) \n$(itermonth)") 
     nothing 
 end
 
 function verboseStep(var,msg::String,sim::AbsFixedStepSim)
     if verbose(sim) 
         if yearly(sim) 
-            curryear,currmonth = date2YearsMonths(currstep(sim)) 
+            curryear,currmonth = date2_yearsmonths(currstep(sim)) 
             currmonth == 0 ? println("$msg : $var") : nothing 
         else 
             println("$msg : $var")
@@ -294,7 +286,7 @@ function prerun!(model,sim)::Int
     if hasfield(typeof(sim.parameters),:seed) && Random.GLOBAL_SEED != seed(sim) 
         seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
     end 
-    trunc(Int,(finishTime(sim) - currstep(sim)) / dt(sim)) 
+    trunc(Int,(finishtime(sim) - currstep(sim)) / dt(sim)) 
 end
 
 function run!(model::AbstractABM,

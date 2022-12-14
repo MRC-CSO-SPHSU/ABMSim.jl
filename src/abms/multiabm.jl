@@ -6,12 +6,9 @@
 """ 
 
 export AbstractMABM
-import MultiAgents: allagents, nagents, add_agent!, move_agent!, kill_agent!
-export allagents, nagents, add_agent!, move_agent!, kill_agent!
-
+export verify_majl
 
 abstract type AbstractMABM  <: AbstractABM end   
-
 
 #= 
 A MutliABM looks similar to the following, though not recommned
@@ -36,18 +33,18 @@ mutable struct MultiABM   <: AbstractMABM
 end # MultiABM  
 =# 
 
-allabms(model::AbstractMABM)::Vector{AbstractABM} = error("ot implemented")
+allabms(model::AbstractMABM)::Vector{AbstractABM} = error("should be implemented")
 
 # an implementation: find out all fields of type AbstractABM and extract allagents 
-allagents(model::AbstractMABM)::Vector{AbstractAgent} = error("not implemented") 
+allagents(model::AbstractMABM)::Vector{AbstractAgent} = error("should be implemented") 
 
-function verifyAgentsJLContract(model::AbstractMABM) 
+function verify_agentsjl(model::AbstractMABM) 
     for abm in allabms(model) 
-        if !verifyAgentsJLContract(abm) return false end 
+        if !verify_agentsjl(abm) return false end 
     end
-    true 
+    return true 
 end  
 
-verifyMAJLContract(model::AbstractMABM) = error("to implement")
+verify_majl(model::AbstractMABM) = error("to implement")
 
 move_agent!(agent,pos,model::AbstractMABM) = error("not implemented") 

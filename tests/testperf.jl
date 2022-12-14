@@ -1,5 +1,6 @@
 using MultiAgents: kill_agent!, kill_agent_opt!, 
-                    kill_agent_at!, kill_agent_at_opt! 
+                    kill_agent_at!, kill_agent_at_opt!,
+                    init_majl 
 
 include("./datatypes.jl")
 
@@ -7,14 +8,15 @@ using MultiAgents: nagents
 
 pretty_summarysize(x) = Base.format_bytes(Base.summarysize(x))
 
+randomPerson() = randomPerson(getIDCOUNTER())
 randomPerson(id) = 
     Person(id,rand(["Aberdeen","Edinbrugh","Glasgow","Highlands"]),
                             rand(0:90) + rand(0:11) // 12 )
 
 function randomABMPopulation(N) 
     agents = Person[] 
-    for i in 1:N 
-        push!(agents,randomPerson(i))
+    for _ in 1:N 
+        push!(agents,randomPerson())
     end 
     population = PopulationABM(agents)
 end
@@ -40,6 +42,8 @@ function killatAndAddAgent!(pop,M,killatfunc)
     end
     nothing 
 end
+
+init_majl() 
 
 # slowest version takes 1 sec. in my machine 
 N = 12_500

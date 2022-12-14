@@ -3,7 +3,7 @@
     similar to Agents.jl, but with extension. 
 """ 
 
-export ABMPV
+export ABMPV, SimpleABM
 
 
 """
@@ -50,6 +50,3 @@ ABMPDV{A,Nothing,Nothing,V}(v::V) where {A,V} =
 
 ABMPDV{A,P,Nothing,V}(p::P,v::V) where {A,P,V} =  
     ABMPDV{A,P,Nothing,V}(A[],p,nothing,v) 
-
-
-

@@ -1,4 +1,4 @@
-using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
+using MultiAgents.Util: date2years_months, AbstractExample, DefaultExample
 using MultiAgents: AbstractXAgent, ABMPDV, SimpleABM, AbstractMABM  
 using MultiAgents: getIDCOUNTER, add_agent!
 

@@ -12,21 +12,21 @@ using Test
 
 # agents 
 
-using MultiAgents: initMultiAgents, MAVERSION, 
-                    verifyMAJLContract, verifyAgentsJLContract 
+using MultiAgents: init_majl, MAVERSION, 
+                    verify_majl, verify_agentsjl 
 using MultiAgents: kill_agent!, kill_agent_opt!, 
                     kill_agent_at!, kill_agent_at_opt!,   
                     seed!, nagents
 using MultiAgents: step!, errorstep, dummystep, run! 
-using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose, yearly 
+using MultiAgents: currstep, stepnumber, dt, starttime, finishtime, verbose, yearly 
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, 
                     FixedStepSim, FixedStepSimP,
                     ABMSimulation
-using MultiAgents: initFixedStepSim!               
+using MultiAgents: init_parameters!               
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
-initMultiAgents()
+init_majl()
 @assert MAVERSION == v"0.4"
 
 include("./datatypes.jl")
@@ -39,8 +39,8 @@ include("./datatypes.jl")
         person1 = Person("Edinbrugh",46//1)             
         person3 = Person("Abderdeen",25 + 3 // 12) 
 
-        @test verifyAgentsJLContract(person3)
-        @test verifyAgentsJLContract(Person)
+        @test verify_agentsjl(person3)
+        @test verify_agentsjl(Person)
 
         @test person1.id == 1 
         @test person3.id == 2
@@ -59,11 +59,11 @@ include("./datatypes.jl")
 
         createInvalidPopulation!(population)
 
-        @test !verifyAgentsJLContract(population)
+        @test !verify_agentsjl(population)
 
         person2 = population[1]
         kill_agent_opt!(person2,population)
-        @test verifyAgentsJLContract(population)
+        @test verify_agentsjl(population)
 
         # As an explaination, person2 has been added twice to the pop. 
         @test population[1].id == person2.id 
@@ -155,14 +155,14 @@ include("./datatypes.jl")
         age_step!(population)
         @test person6.age == 29 + 6 // 12 
 
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test population.variables.stepnumber == 1 
 
         step!(population,age_step!,n=12) 
         @test person1.age > 47 && person6.age > 30
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test year == 1980 
@@ -170,7 +170,7 @@ include("./datatypes.jl")
         
         step!(population,age_step!,population_step!,n=12)
         @test person1.age > 48 && person6.age > 31
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test year == 1981 
@@ -178,7 +178,7 @@ include("./datatypes.jl")
 
         step!(population,dummystep,age_step!,dummystep,n=12)
         @test person1.age > 49 && person6.age > 32
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test year == 1981 
@@ -193,33 +193,33 @@ include("./datatypes.jl")
         createPopulation!(pop)
 
         simulator2 = FixedStepSim(dt=1//12,
-                                startTime=1981,finishTime=1991,
+                                starttime=1981,finishtime=1991,
                                 verbose=false)
 
         mutable struct SimPars1 
-            startTime
+            starttime
             dummy 
             SimPars1() = new(1980,false)
         end 
 
-        @test_logs (:warn,r".*present.*") initFixedStepSim!(simulator2,SimPars1())
+        @test_logs (:warn,r".*present.*") init_parameters!(simulator2,SimPars1())
 
-        @test verifyMAJLContract(simulator2)
+        @test verify_majl(simulator2)
 
         mutable struct SimPars2 
             dt
-            startTime
-            finishTime 
+            starttime
+            finishtime 
             SimPars2() = new(1//12,1980,1990)
         end 
 
         simulator3 = FixedStepSimP{SimPars1}(SimPars1())
-        @test !verifyMAJLContract(simulator3)
+        @test !verify_majl(simulator3)
 
         simulator = FixedStepSimP{SimPars2}(SimPars2())
-        initFixedStepSim!(simulator2,SimPars2())
+        init_parameters!(simulator2,SimPars2())
 
-        @test verifyMAJLContract(simulator2)
+        @test verify_majl(simulator2)
 
         @test currstep(simulator2) == 1980 // 1 == currstep(simulator)
         @test dt(simulator2) == 1 // 12 == dt(simulator)
@@ -235,9 +235,9 @@ include("./datatypes.jl")
         @test currstep(simulator)  == 1990 
         @test stepnumber(simulator) == 120
 
-        initFixedStepSim!(simulator, dt= 1 // 12, 
-                            startTime = 1990,
-                            finishTime = 2000) 
+        init_parameters!(simulator, dt= 1 // 12, 
+                            starttime = 1990,
+                            finishtime = 2000) 
 
         @test currstep(simulator) == 1990 
         @test dt(simulator) == 1 // 12 
@@ -245,7 +245,7 @@ include("./datatypes.jl")
                                 
         run!(pop,dummystep,age_step!,dummystep,simulator) 
 
-        @test currstep(simulator) == finishTime(simulator) 
+        @test currstep(simulator) == finishtime(simulator) 
         @test stepnumber(simulator) == 120
 
     end
@@ -282,11 +282,11 @@ include("./datatypes.jl")
 
         @test_throws Exception  abmsim = 
                 ABMSimulation( dt=1//12,
-                                startTime=1980, finishTime=1990,
+                                starttime=1980, finishtime=1990,
                                 verbose=false, yearly=true) 
 
         abmsim = ABMSimulation( dt=1//12,
-                                startTime=1980, finishTime=1990,
+                                starttime=1980, finishtime=1990,
                                 verbose=false, yearly=true, 
                                 setupEnabled = false) 
 
@@ -379,8 +379,8 @@ include("./datatypes.jl")
         demography = Demography()
 
         simulator = FixedStepSim(dt=1//12,
-                                    startTime=1980,
-                                    finishTime=1980+10,
+                                    starttime=1980,
+                                    finishtime=1980+10,
                                     verbose = false )
         
         share1 = demography.shares[1]
@@ -404,14 +404,14 @@ include("./datatypes.jl")
         @test stepnumber(simulator) == 120 
         @test share1.price !=  price 
         
-        initFixedStepSim!(simulator, dt= 1 // 12, 
-                            startTime = 1990 ,
-                            finishTime = 2000 , 
+        init_parameters!(simulator, dt= 1 // 12, 
+                            starttime = 1990 ,
+                            finishtime = 2000 , 
                             verbose = false) 
 
         run!(demography,dummystep,age_step!,stock_step!,simulator) 
                             
-        @test finishTime(simulator) == currstep(simulator)
+        @test finishtime(simulator) == currstep(simulator)
         @test stepnumber(simulator) == 120
 
     end 
@@ -448,12 +448,12 @@ include("./datatypes.jl")
 
         @test_throws ErrorException  abmsim = 
                 ABMSimulation( dt=1//12,
-                                startTime=1980, 
-                                finishTime=1980+10,
+                                starttime=1980, 
+                                finishtime=1980+10,
                                 verbose=false, yearly=true) 
 
-        abmsim = ABMSimulation( dt=1//12, startTime=1980, 
-                                            finishTime=1980+10,
+        abmsim = ABMSimulation( dt=1//12, starttime=1980, 
+                                            finishtime=1980+10,
                                             verbose=false, yearly=true,
                                             setupEnabled = false) 
         
@@ -484,8 +484,8 @@ include("./datatypes.jl")
         @test quantity1 != share1.quantity
         
         run!(demography,abmsim)
-        @test currstep(abmsim) == finishTime(abmsim) ==
-                startTime(abmsim)+10 
+        @test currstep(abmsim) == finishtime(abmsim) ==
+                starttime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
 
@@ -518,8 +518,8 @@ include("./datatypes.jl")
         demography = Demography()  
 
 
-        abmsim = ABMSimulation( dt=1//12, startTime=1980, 
-                                            finishTime=1980+10,
+        abmsim = ABMSimulation( dt=1//12, starttime=1980, 
+                                            finishtime=1980+10,
                                             verbose=false, yearly=true,
                                             setupEnabled = false) 
         
@@ -548,8 +548,8 @@ include("./datatypes.jl")
         @test quantity1 != share1.quantity
         
         run!(demography,abmsim,TestExample())
-        @test currstep(abmsim) == finishTime(abmsim) ==
-                startTime(abmsim)+10 
+        @test currstep(abmsim) == finishtime(abmsim) ==
+                starttime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
 
