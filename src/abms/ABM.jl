@@ -22,7 +22,7 @@ end
     ABMPDV{A,P,D,V} 
 
 Agent based model specification for social simulations
-    with data, parameters, time and variable fields 
+    with data, parameters and variable fields 
 """
 mutable struct ABMPDV{A <: AbstractAgent, P, D, V} <: AbstractABM
     agentsList::Vector{A}
