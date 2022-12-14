@@ -3,6 +3,8 @@ using MultiAgents: kill_agent!, kill_agent_opt!,
 
 include("./datatypes.jl")
 
+using MultiAgents: nagents
+
 pretty_summarysize(x) = Base.format_bytes(Base.summarysize(x))
 
 randomPerson(id) = 
@@ -14,7 +16,7 @@ function randomABMPopulation(N)
     for i in 1:N 
         push!(agents,randomPerson(i))
     end 
-    population = ABM{Person}(agents)
+    population = PopulationABM(agents)
 end
 
 function killAndAddAgent!(pop,M,killfunc) 
@@ -39,16 +41,23 @@ function killatAndAddAgent!(pop,M,killatfunc)
     nothing 
 end
 
-N = 10_000
-M = 210_000  # slowest version takes 1 sec. in my machine 
+# slowest version takes 1 sec. in my machine 
+N = 12_500
+M = 200_000  
 
-population = randomABMPopulation(10_000)
+population = randomABMPopulation(N)
 
 println(" storage for population : $(pretty_summarysize(population))") 
 
-@time killAndAddAgent!(population,210_000,kill_agent!) 
-@time killAndAddAgent!(population,210_000,kill_agent_opt!) 
+@info "kill_agent!(agent,abm)"
+@time killAndAddAgent!(population,M,kill_agent!) 
 
-@time killatAndAddAgent!(population,210_000,kill_agent_at!) 
-@time killatAndAddAgent!(population,210_000,kill_agent_at_opt!) 
+@info "kill_agent_opt!(agent,abm)"
+@time killAndAddAgent!(population,M,kill_agent_opt!) 
+
+@info "kill_agent_at!(agent,abm)"
+@time killatAndAddAgent!(population,M,kill_agent_at!)
+
+@info "kill_agent_at_opt!(ind,abm)"
+@time killatAndAddAgent!(population,M,kill_agent_at_opt!) 
 
