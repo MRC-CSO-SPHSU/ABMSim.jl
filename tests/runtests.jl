@@ -12,20 +12,22 @@ using Test
 
 # agents 
 
-using MultiAgents: initMultiAgents, MAVERSION, 
-                    verifyMAJLContract, verifyAgentsJLContract 
-using MultiAgents: kill_agent!, seed!, nagents
+using MultiAgents: init_majl, MAVERSION, 
+                    verify_majl, verify_agentsjl 
+using MultiAgents: kill_agent!, kill_agent_opt!, 
+                    kill_agent_at!, kill_agent_at_opt!,   
+                    seed!, nagents
 using MultiAgents: step!, errorstep, dummystep, run! 
-using MultiAgents: currstep, stepnumber, dt, startTime, finishTime, verbose, yearly 
+using MultiAgents: currstep, stepnumber, dt, starttime, finishtime, verbose, yearly 
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, 
                     FixedStepSim, FixedStepSimP,
-                    ABMSimulation
-using MultiAgents: initFixedStepSim!               
+                    ABMSimulator
+using MultiAgents: init_parameters!               
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
-initMultiAgents()
-@assert MAVERSION == v"0.3.1"
+init_majl()
+@assert MAVERSION == v"0.4"
 
 include("./datatypes.jl")
 
@@ -37,8 +39,8 @@ include("./datatypes.jl")
         person1 = Person("Edinbrugh",46//1)             
         person3 = Person("Abderdeen",25 + 3 // 12) 
 
-        @test verifyAgentsJLContract(person3)
-        @test verifyAgentsJLContract(Person)
+        @test verify_agentsjl(person3)
+        @test verify_agentsjl(Person)
 
         @test person1.id == 1 
         @test person3.id == 2
@@ -53,20 +55,41 @@ include("./datatypes.jl")
             PopVars(t) = new(0,t)
         end
 
-        population = ABM{Person}(variables = PopVars(1980 // 1))
+        population = ABMPDV{Person,Nothing,Nothing,PopVars}(PopVars(1980 // 1))
 
         createInvalidPopulation!(population)
 
-        @test !verifyAgentsJLContract(population)
+        @test !verify_agentsjl(population)
 
         person2 = population[1]
-        kill_agent!(person2,population)
-        @test verifyAgentsJLContract(population)
+        kill_agent_opt!(person2,population)
+        @test verify_agentsjl(population)
 
+        # As an explaination, person2 has been added twice to the pop. 
         @test population[1].id == person2.id 
 
         kill_agent!(population[1],population)
         @test nagents(population) == 4
+
+        add_agent!(person2, population) 
+        @test nagents(population) == 5 
+        @test population[1] == person2 
+
+        kill_agent!(1,population)               # kill the agent with id 1 
+        @test population.agentsList[1].id == 5  # person with id 5 was moved to the first 
+        @test nagents(population) == 4 
+
+        person_idx5 = population.agentsList[1]  
+        kill_agent_at!(1,population) 
+        @test population.agentsList[1].id == 2
+        @test nagents(population) == 3
+        add_agent!(person_idx5, population)  
+
+        person_idx2 = population.agentsList[1]  
+        kill_agent_at_opt!(1,population) 
+        @test population.agentsList[1].id == population[5].id
+        @test nagents(population) == 3
+        add_agent!(person_idx2, population)
 
         @test_throws ArgumentError kill_agent!(person2,population)
         @test nagents(population) == 4
@@ -80,7 +103,8 @@ include("./datatypes.jl")
 
     @testset verbose=true "pre-defined stepping functions of ABMs" begin
 
-        population = ABM{Person}(variables = PopVars(1980 // 1))
+        population = PopulationType{Nothing,Nothing,PopVars}(PopVars(1980 // 1))
+
         createPopulation!(population)
 
         person1 = population[1]
@@ -92,19 +116,20 @@ include("./datatypes.jl")
 
     end 
 
-    stepsize(population::ABM{Person}) = 1 // 12 
+   
+    stepsize(population) = 1 // 12 
 
-    age_step!(person::Person,model::ABM{Person},
+    age_step!(person::Person,model,
                 simulator::AbsFixedStepSim = DefaultFixedStepSim()) = 
         person.age += stepsize(model)
     
-    function population_step!(population::ABM{Person}) 
+    function population_step!(population) 
         population.variables.time += stepsize(population)
         population.variables.stepnumber += 1
         nothing 
     end
 
-    function age_step!(population::ABM{Person})
+    function age_step!(population)
         
         agents = allagents(population) 
         for person in agents 
@@ -114,13 +139,12 @@ include("./datatypes.jl")
 
     end 
 
-    prestep!(pop::ABM{Person}) = pop.variables.time += stepsize(pop)  
-    poststep!(pop::ABM{Person}) = pop.variables.stepnumber += 1
-
+    prestep!(pop::PopulationType) = pop.variables.time += stepsize(pop)  
+    poststep!(pop::PopulationType) = pop.variables.stepnumber += 1
 
     @testset verbose=true "self-defined stepping functions for ABMs" begin 
 
-        population = ABM{Person}(variables = PopVars(1980 // 1))
+        population = PopulationType{Nothing,Nothing,PopVars}(PopVars(1980 // 1))
         createPopulation!(population)
         
         person1 = population[1]
@@ -131,14 +155,14 @@ include("./datatypes.jl")
         age_step!(population)
         @test person6.age == 29 + 6 // 12 
 
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test population.variables.stepnumber == 1 
 
         step!(population,age_step!,n=12) 
         @test person1.age > 47 && person6.age > 30
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test year == 1980 
@@ -146,7 +170,7 @@ include("./datatypes.jl")
         
         step!(population,age_step!,population_step!,n=12)
         @test person1.age > 48 && person6.age > 31
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test year == 1981 
@@ -154,7 +178,7 @@ include("./datatypes.jl")
 
         step!(population,dummystep,age_step!,dummystep,n=12)
         @test person1.age > 49 && person6.age > 32
-        year,month = date2YearsMonths(population.variables.time)
+        year,month = date2years_months(population.variables.time)
         month += 1  # adjust 
         @test month == 2
         @test year == 1981 
@@ -162,39 +186,40 @@ include("./datatypes.jl")
         
     end 
 
+
     @testset verbose=true "Simulating an ABM with a simple simulator" begin 
 
-        pop = ABM{Person}()
+        pop = PopulationABM()
         createPopulation!(pop)
 
         simulator2 = FixedStepSim(dt=1//12,
-                                startTime=1981,finishTime=1991,
+                                starttime=1981,finishtime=1991,
                                 verbose=false)
 
         mutable struct SimPars1 
-            startTime
+            starttime
             dummy 
             SimPars1() = new(1980,false)
         end 
 
-        @test_logs (:warn,r".*present.*") initFixedStepSim!(simulator2,SimPars1())
+        @test_logs (:warn,r".*present.*") init_parameters!(simulator2,SimPars1())
 
-        @test verifyMAJLContract(simulator2)
+        @test verify_majl(simulator2)
 
         mutable struct SimPars2 
             dt
-            startTime
-            finishTime 
+            starttime
+            finishtime 
             SimPars2() = new(1//12,1980,1990)
         end 
 
         simulator3 = FixedStepSimP{SimPars1}(SimPars1())
-        @test !verifyMAJLContract(simulator3)
+        @test !verify_majl(simulator3)
 
         simulator = FixedStepSimP{SimPars2}(SimPars2())
-        initFixedStepSim!(simulator2,SimPars2())
+        init_parameters!(simulator2,SimPars2())
 
-        @test verifyMAJLContract(simulator2)
+        @test verify_majl(simulator2)
 
         @test currstep(simulator2) == 1980 // 1 == currstep(simulator)
         @test dt(simulator2) == 1 // 12 == dt(simulator)
@@ -210,9 +235,9 @@ include("./datatypes.jl")
         @test currstep(simulator)  == 1990 
         @test stepnumber(simulator) == 120
 
-        initFixedStepSim!(simulator, dt= 1 // 12, 
-                            startTime = 1990,
-                            finishTime = 2000) 
+        init_parameters!(simulator, dt= 1 // 12, 
+                            starttime = 1990,
+                            finishtime = 2000) 
 
         @test currstep(simulator) == 1990 
         @test dt(simulator) == 1 // 12 
@@ -220,18 +245,19 @@ include("./datatypes.jl")
                                 
         run!(pop,dummystep,age_step!,dummystep,simulator) 
 
-        @test currstep(simulator) == finishTime(simulator) 
+        @test currstep(simulator) == finishtime(simulator) 
         @test stepnumber(simulator) == 120
 
     end
 
-    incomeChange!(person::Person,pop::ABM{Person},::ABMSimulation) =  
+
+    incomeChange!(person::Person,pop,::ABMSimulator) =  
         person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier * person.income
     
-    age_step!(person::Person,pop::ABM{Person},simulator::ABMSimulation) = 
+    age_step!(person::Person,pop::PopulationType,simulator::ABMSimulator) = 
         person.age += dt(simulator)
 
-    function incomeAvg!(pop::ABM{Person},simulator::ABMSimulation) 
+    function incomeAvg!(pop::PopulationType,simulator::ABMSimulator) 
         ret = 0
         for person in allagents(pop)
             ret += person.income 
@@ -241,8 +267,7 @@ include("./datatypes.jl")
         nothing 
     end 
 
-
-    @testset verbose=true "Simulating an ABM with an ABM Simulation type" begin 
+    @testset verbose=true "Simulating an ABM with an ABM Simulator type" begin 
 
         struct IncomePars
             changeModifier::Float64
@@ -252,17 +277,16 @@ include("./datatypes.jl")
             averageIncome::Float64 
         end 
     
-        popWincome = ABM{Person}(parameters = IncomePars(0.01), 
-                                    variables = IncomeVar(0))
+        popWincome = PopulationType{IncomePars,Nothing,IncomeVar}(IncomePars(0.01),IncomeVar(0))
         createPopulation!(popWincome)
 
         @test_throws Exception  abmsim = 
-                ABMSimulation( dt=1//12,
-                                startTime=1980, finishTime=1990,
+                ABMSimulator( dt=1//12,
+                                starttime=1980, finishtime=1990,
                                 verbose=false, yearly=true) 
 
-        abmsim = ABMSimulation( dt=1//12,
-                                startTime=1980, finishTime=1990,
+        abmsim = ABMSimulator( dt=1//12,
+                                starttime=1980, finishtime=1990,
                                 verbose=false, yearly=true, 
                                 setupEnabled = false) 
 
@@ -287,7 +311,6 @@ include("./datatypes.jl")
 
     end
 
- 
     @testset verbose=true "Testing a MultiABM basic functionalities " begin 
 
         demography = Demography()
@@ -337,6 +360,7 @@ include("./datatypes.jl")
 
     end 
 
+
     function stock_step!(demography::Demography,sim::AbsFixedStepSim,
                             example :: AbstractExample = DefaultExample()) 
 
@@ -355,8 +379,8 @@ include("./datatypes.jl")
         demography = Demography()
 
         simulator = FixedStepSim(dt=1//12,
-                                    startTime=1980,
-                                    finishTime=1980+10,
+                                    starttime=1980,
+                                    finishtime=1980+10,
                                     verbose = false )
         
         share1 = demography.shares[1]
@@ -378,16 +402,16 @@ include("./datatypes.jl")
                             
         @test 1990 == currstep(simulator)
         @test stepnumber(simulator) == 120 
-        @test share1.price != price 
+        @test share1.price !=  price 
         
-        initFixedStepSim!(simulator, dt= 1 // 12, 
-                            startTime = 1990 ,
-                            finishTime = 2000 , 
+        init_parameters!(simulator, dt= 1 // 12, 
+                            starttime = 1990 ,
+                            finishtime = 2000 , 
                             verbose = false) 
 
         run!(demography,dummystep,age_step!,stock_step!,simulator) 
                             
-        @test finishTime(simulator) == currstep(simulator)
+        @test finishtime(simulator) == currstep(simulator)
         @test stepnumber(simulator) == 120
 
     end 
@@ -398,7 +422,7 @@ include("./datatypes.jl")
                 example::AbstractExample = DefaultExample()) = 
                     person.income += ( rand() + 1 ) * 1000
     
-    function buyStocks!(demography::Demography,sim::ABMSimulation,
+    function buyStocks!(demography::Demography,sim::ABMSimulator,
                         example::AbstractExample=DefaultExample()) 
         
         for person in allagents(demography) 
@@ -423,13 +447,13 @@ include("./datatypes.jl")
         demography = Demography()  
 
         @test_throws ErrorException  abmsim = 
-                ABMSimulation( dt=1//12,
-                                startTime=1980, 
-                                finishTime=1980+10,
+                ABMSimulator( dt=1//12,
+                                starttime=1980, 
+                                finishtime=1980+10,
                                 verbose=false, yearly=true) 
 
-        abmsim = ABMSimulation( dt=1//12, startTime=1980, 
-                                            finishTime=1980+10,
+        abmsim = ABMSimulator( dt=1//12, starttime=1980, 
+                                            finishtime=1980+10,
                                             verbose=false, yearly=true,
                                             setupEnabled = false) 
         
@@ -460,15 +484,15 @@ include("./datatypes.jl")
         @test quantity1 != share1.quantity
         
         run!(demography,abmsim)
-        @test currstep(abmsim) == finishTime(abmsim) ==
-                startTime(abmsim)+10 
+        @test currstep(abmsim) == finishtime(abmsim) ==
+                starttime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
 
 
     struct TestExample <: AbstractExample end 
 
-    function buyStocks!(demography::Demography,sim::ABMSimulation,example::TestExample) 
+    function buyStocks!(demography::Demography,sim::ABMSimulator,example::TestExample) 
         
         if stepnumber(sim) % 24 != 0 return nothing end 
 
@@ -494,8 +518,8 @@ include("./datatypes.jl")
         demography = Demography()  
 
 
-        abmsim = ABMSimulation( dt=1//12, startTime=1980, 
-                                            finishTime=1980+10,
+        abmsim = ABMSimulator( dt=1//12, starttime=1980, 
+                                            finishtime=1980+10,
                                             verbose=false, yearly=true,
                                             setupEnabled = false) 
         
@@ -524,8 +548,8 @@ include("./datatypes.jl")
         @test quantity1 != share1.quantity
         
         run!(demography,abmsim,TestExample())
-        @test currstep(abmsim) == finishTime(abmsim) ==
-                startTime(abmsim)+10 
+        @test currstep(abmsim) == finishtime(abmsim) ==
+                starttime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
 

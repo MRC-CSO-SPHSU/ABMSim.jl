@@ -1,13 +1,13 @@
 """
-Definition of an ABM-Simulation type.
+Definition of an ABM-Simulator type.
 """ 
 
-export ABMSimulation 
+export ABMSimulator 
 
 # using MultiAgents: defaultpoststep!, defaultprestep! 
 using MultiAgents.Util: AbstractExample, DefaultExample
 
-mutable struct ABMSimulationP{SimParType} <: AbstractABMSimulation  
+mutable struct ABMSimulatorP{SimParType} <: AbstractABMSimulator  
     parameters::SimParType 
     
     pre_model_steps::Vector{Function} 
@@ -17,26 +17,26 @@ mutable struct ABMSimulationP{SimParType} <: AbstractABMSimulation
     # example 
     stepnumber::Int 
 
-    function ABMSimulationP{SimParType}(
+    function ABMSimulatorP{SimParType}(
                     pars::SimParType;
                     example=DefaultExample(),setupEnabled=true) where SimParType 
         # abmsimulation = new(pars,[defaultprestep!],[],[defaultpoststep!],0)
         abmsimulation = new(pars,[],[],[],0)
         setupEnabled ? setup!(abmsimulation,example) : nothing 
-        verifyMAJLContract(abmsimulation)
+        verify_majl(abmsimulation)
         abmsimulation 
     end
 
-end # ABMSimulationP
+end # ABMSimulatorP
 
-const ABMSimulation = ABMSimulationP{FixedStepSimPars}
+const ABMSimulator = ABMSimulatorP{FixedStepSimPars}
 
-ABMSimulation(;dt, startTime, finishTime, 
+ABMSimulator(;dt, starttime, finishtime, 
 example=DefaultExample(),
 seed=0,verbose=false,yearly=false, 
 setupEnabled = true) = 
-    ABMSimulation(FixedStepSimPars( dt=dt, 
-                                    startTime = startTime, finishTime = finishTime,
+    ABMSimulator(FixedStepSimPars( dt=dt, 
+                                    starttime = starttime, finishtime = finishtime,
                                     seed = seed, verbose = verbose, yearly = yearly), 
                     example = example,
                     setupEnabled = setupEnabled) 

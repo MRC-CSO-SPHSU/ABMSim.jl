@@ -4,32 +4,31 @@ Specification of an abstract ABM type as a supertype for all
     from Agents.jl
 """
 
-using  MultiAgents.Util: removeFirst!
+using  MultiAgents.Util: remove_first!, remove_first_opt!
 import Random.seed!
 
 export AbstractABM 
 export allagents, nagents
-export add_agent!, move_agent!, kill_agent!
-export verifyAgentsJLContract
+export add_agent!, move_agent!, 
+        kill_agent!, kill_agent_opt!, 
+        kill_agent_at!, kill_agent_at_opt!
+export verify_majl
 
 
 "Abstract ABM resembles the ABM concept from Agents.jl"
 abstract type AbstractABM end 
 
-"interface used by verifyAgentsJLContract functions"
-# function allagents(::AbstractABM)::Vector{AgentType} where AgentType <: AbstractAgent end
-
 "An AbstractABM subtype to have a list of agents"
 allagents(model::AbstractABM) = model.agentsList
 
-function verifyAgentsJLContract(model::AbstractABM)
+function verify_agentsjl(model::AbstractABM)
     #= all ids are unique =# 
     agents = allagents(model)
     ids    = [ id for agent in agents for id = agent.id]
-    length(ids) == length(Set(ids))
+    return length(ids) == length(Set(ids))
 end
 
-verifyMAJLContract(model::AbstractABM) = error("to implement")
+verify_majl(model::AbstractABM) = error("to implement")
 
 # The following part is to be seperated in an another file, to be excluded
 # when agents.jl is used 
@@ -62,24 +61,20 @@ function Base.getindex(model::AbstractABM,id::Int64)
         end 
     end   
     error("index id in $model does not exist")
+    return agents[0]
 end 
-
-
 
 #========================================
 Functionalities for agents within an ABM
 =########################################
 
-
 "random seed of the model (Agents.jl)"
 seed!(model::AbstractABM,seed) =
     seed == 0 ? seed!(floor(Int,time())) : seed!(seed)
 
-
-"numbe of  agents"
+"number of agents"
 nagents(model::AbstractABM) = length(allagents(model))
  
-
 #= 
 Couple of other useful functions may include:
 
@@ -96,12 +91,10 @@ Functionalities for agents within an ABM
 =########################################
 
 "add agent with its position to the model"
-function add_agent!(agent::AbstractAgent,model::AbstractABM) # where T <: AbstractAgent
-    push!(allagents(model),agent)
-end 
+add_agent!(agent,model::AbstractABM) = push!(allagents(model),agent)
 
 "symmetry"
-add_agent!(model::AbstractABM,agent::AbstractAgent) = add_agent!(agent,model)
+add_agent!(model::AbstractABM,agent) = add_agent!(agent,model)
 
 #=
 "add agent to the model"
@@ -114,10 +107,31 @@ end
 move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 
 "remove an agent"
-kill_agent!(agent,model::AbstractABM) = removeFirst!(allagents(model),agent)
+kill_agent!(agent,model::AbstractABM) = remove_first!(allagents(model),agent)
+
+kill_agent_opt!(agent, model::AbstractABM) = 
+    remove_first_opt!(allagents(model), agent)
+
+kill_agent!(id::Int, model::AbstractABM) = kill_agent!(model[id],model)
+
+function kill_agent_at!(id::Int,model::AbstractABM)
+    deleteat!(allagents(model),id) 
+    nothing
+end 
+
+function kill_agent_at_opt!(id::Int,model::AbstractABM) 
+    agents = allagents(model)
+    agents[id] = agents[length(agents)]
+    # len = length(agents) 
+    # (agents[id], agents[len]) = (agents[len],agents[id])
+    pop!(agents) # deleteat!(agents,len)
+    nothing 
+end 
+
 
 "symmety"
 kill_agent!(model::AbstractABM,agent) = kill_agent!(agent,model)
+kill_agent_opt!(model::AbstractABM,agent) = kill_agent_opt!(agent,model)
 
 #=
 Other potential functions 

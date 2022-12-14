@@ -15,3 +15,5 @@ Julia package for modeling and simulation of Multi-agent based models
 - **V0.3** (21-10-2022) :  removing all static dictionaries declaration, removing major causes of type instabilities, simulation parameters type for fixed step simulation (subject to improvement), allowing several type of simulations  (agents.jl-like, simple fixed step, simple ABM) with DRY-based style, no MABM or MABM simulation concrete types (not needed by current case study), comprehensive set of unit tests across the whole package (90 unit tests), time is not associated with the model but implicitly embedded in a simulation type, stepping and running a model can use example as a trait (with DefaultExample() if not specified) 
 
    - V0.3.1   (7-11-2022)  : User-arbitrary types for simulation parameters 
+   
+ - **V0.4**   (14-12-2022) : optimized implementation of kill_agent!, simple and parameterized ABM type, blueStyle coding guidelines, constistent naming conventions of source files, unit tests increased to 101
