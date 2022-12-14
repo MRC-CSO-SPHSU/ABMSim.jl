@@ -117,19 +117,19 @@ include("./datatypes.jl")
     end 
 
    
-    stepsize(population::PopulationType) = 1 // 12 
+    stepsize(population) = 1 // 12 
 
-    age_step!(person::Person,model::PopulationType,
+    age_step!(person::Person,model,
                 simulator::AbsFixedStepSim = DefaultFixedStepSim()) = 
         person.age += stepsize(model)
     
-    function population_step!(population::PopulationType) 
+    function population_step!(population) 
         population.variables.time += stepsize(population)
         population.variables.stepnumber += 1
         nothing 
     end
 
-    function age_step!(population::PopulationType)
+    function age_step!(population)
         
         agents = allagents(population) 
         for person in agents 
@@ -189,7 +189,7 @@ include("./datatypes.jl")
 
     @testset verbose=true "Simulating an ABM with a simple simulator" begin 
 
-        pop = PopulationType{Nothing,Nothing,Nothing}()
+        pop = PopulationABM()
         createPopulation!(pop)
 
         simulator2 = FixedStepSim(dt=1//12,
@@ -552,8 +552,6 @@ include("./datatypes.jl")
                 startTime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
-
- 
 
 
 end  # testset MultiAgents components 

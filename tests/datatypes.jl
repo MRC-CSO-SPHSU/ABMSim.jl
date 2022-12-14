@@ -1,17 +1,17 @@
 using MultiAgents.Util: date2YearsMonths, AbstractExample, DefaultExample
-using MultiAgents: AbstractXAgent, ABMPDV, AbstractMABM  
+using MultiAgents: AbstractXAgent, ABMPDV, SimpleABM, AbstractMABM  
 using MultiAgents: getIDCOUNTER, add_agent!
 
 mutable struct Person <: AbstractXAgent 
     id::Int 
-    pos 
+    pos::String 
     age::Rational{Int}
     income::Float64  
     Person(position,a::Rational{Int}) = new(getIDCOUNTER(),position,a,10000.0)
     Person(id,position,a::Rational{Int}) = new(id,position,a,10000.0)
 end 
 
-const PopulationABM = ABMPDV{Person,Nothing,Nothing,Nothing}
+const PopulationABM = SimpleABM{Person}
 const PopulationType = ABMPDV{Person,P,D,V} where {P,D,V}
 
 
