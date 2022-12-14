@@ -2,7 +2,7 @@ module MultiAgents
 
     export initMultiAgents, MAVERSION
 
-    const MAVERSION = v"0.3.2"
+    const MAVERSION = v"0.4"
 
     include("src/Util.jl")
 
