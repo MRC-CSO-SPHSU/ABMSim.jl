@@ -1,14 +1,26 @@
 """
     An Agent Based Model concept based on AbstractAgent type 
-    similar to Agents.jl, but with extension. Later this would be 
-    probably renamed , e.g. XABM  
+    similar to Agents.jl, but with extension. 
 """ 
 
 export ABMPV
 
-# dummydeclare(dict::Dict{Symbol}=Dict{Symbol}()) = nothing 
 
 """
+    SimpleABM{AgentType}
+
+ Simple ABM type with only agents as fields    
+""" 
+struct SimpleABM{A <: AbstractAgent} <: AbstractABM
+    agentsList::Vector{A}
+
+    SimpleABM{A}() where A = new{A}(A[]) 
+    SimpleABM{A}(agents) where A = new{A}(agents)
+end 
+
+"""
+    ABMPDV{A,P,D,V} 
+
 Agent based model specification for social simulations
     with data, parameters, time and variable fields 
 """
@@ -22,16 +34,6 @@ mutable struct ABMPDV{A <: AbstractAgent, P, D, V} <: AbstractABM
     ABMPDV{A,P,D,V}(agents::Vector{A},pars::P,da::D,vars::V)  where {A,P,D,V}  = 
         new{A,P,D,V}(agents,pars,da,vars) 
 
-    #=
-    ABMPDV{A,P,D,V}(agents::Vector{A}; parameters=nothing, 
-                              data=nothing, variables=nothing) where {A,P,D,V} =
-        ABMPDV{A}(agents,parameters,data,variables)
-     
-    ABMPDV{A,P,D,V}(;parameters=nothing, 
-                data=nothing, variables=nothing,  
-                declare::Function = pars -> Vector{A}()) where {A,P,D,V}  = 
-        ABMPDV{A,P,D,V}(declare(parameters),parameters,data,variables) 
-    =# 
 end # AgentBasedModel  
 
 
@@ -50,26 +52,4 @@ ABMPDV{A,P,Nothing,V}(p::P,v::V) where {A,P,V} =
     ABMPDV{A,P,Nothing,V}(A[],p,nothing,v) 
 
 
-#=
-mutable struct ABM{AgentType <: AbstractAgent} <: AbstractABM
-    agentsList::Vector{AgentType}
-    
-    parameters              # model parameters ideally as a struct data type
-    data                   
-    variables                
-
-    ABM{AgentType}(agents::Vector{AgentType},pars,da,vars)  where AgentType  = 
-        new{AgentType}(agents,pars,da,vars) 
-
-    ABM{AgentType}(agents::Vector{AgentType}; parameters=nothing, 
-                                  data=nothing, variables=nothing) where AgentType =
-        ABM{AgentType}(agents,parameters,data,variables)
-     
-    ABM{AgentType}(;parameters=nothing, 
-                    data=nothing, variables=nothing,  
-                    declare::Function = pars -> Vector{AgentType}()) where AgentType  = 
-        ABM{AgentType}(declare(parameters),parameters,data,variables) 
-
-end # AgentBasedModel  
-=# 
 
