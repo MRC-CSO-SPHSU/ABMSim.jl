@@ -93,25 +93,27 @@ end
 struct DefaultFixedStepSim <: AbsFixedStepSim end   
                               
 "dummy stepping function for arbitrary agents"
-dummystep(::AbstractAgent,::AbstractABM,
-            simulator::AbsFixedStepSim=DefaultFixedStepSim(), 
-            example::AbstractExample = DefaultExample()) = nothing 
+dummystep(::AbstractAgent,
+            ::AbstractABM,
+            ::AbsFixedStepSim = DefaultFixedStepSim(), 
+            ::AbstractExample = DefaultExample()) = nothing 
                                          
 "default dummy model stepping function"
 dummystep(::AbstractABM,
-            simulator::AbsFixedStepSim=DefaultFixedStepSim(),
-            example::AbstractExample = DefaultExample()) = nothing 
+            ::AbsFixedStepSim = DefaultFixedStepSim(),
+            ::AbstractExample = DefaultExample()) = nothing 
                                         
 "Default agent stepping function for reminding the client that it should be provided"
-errorstep(::AbstractAgent,::AbstractABM,
-            simulator::AbsFixedStepSim=DefaultFixedStepSim(),
-            example::AbstractExample = DefaultExample()) = 
+errorstep(::AbstractAgent,
+            ::AbstractABM,
+            ::AbsFixedStepSim=DefaultFixedStepSim(),
+            ::AbstractExample = DefaultExample()) = 
                 error("agent stepping function has not been specified")
                                         
 "Default model stepping function for reminding the client that it should be provided"
 errorstep(::AbstractABM,
-            simulator::AbsFixedStepSim=DefaultFixedStepSim(),
-            example::AbstractExample = DefaultExample()) = 
+            ::AbsFixedStepSim = DefaultFixedStepSim(),
+            ::AbstractExample = DefaultExample()) = 
                 error("model stepping function has not been specified")
                                         
 @mix @with_kw struct FixedStepPars 
@@ -139,8 +141,7 @@ function init_parameters!(simPars::FixedStepSimPars,pars)
     nothing 
 end
  
-init_parameters!(sim::AbsFixedStepSim,pars) = 
-    init_parameters!(sim.parameters,pars)
+init_parameters!(sim::AbsFixedStepSim,pars) = init_parameters!(sim.parameters,pars)
 
 function init_parameters!(sim::AbsFixedStepSim;
                                 dt, starttime, finishtime,
@@ -203,6 +204,8 @@ function prestep!(model::AbstractABM,sim::AbsFixedStepSim)
 end 
 
 prestep!(model::AbstractABM,::DefaultFixedStepSim) = nothing 
+
+# todo : function argument to be first 
 
 function apply_agent_step!(model,
                             agent_step!::Function,
@@ -282,11 +285,11 @@ function step!(model::AbstractABM,
     nothing 
 end 
 
-function prerun!(model,sim)::Int  
+function prerun!(model,sim)::Int
     if hasfield(typeof(sim.parameters),:seed) && Random.GLOBAL_SEED != seed(sim) 
         seed(sim) == 0 ?  seed!(floor(Int, time())) : seed!(seed(sim))
     end 
-    trunc(Int,(finishtime(sim) - currstep(sim)) / dt(sim)) 
+    return trunc(Int,(finishtime(sim) - currstep(sim)) / dt(sim)) 
 end
 
 function run!(model::AbstractABM,

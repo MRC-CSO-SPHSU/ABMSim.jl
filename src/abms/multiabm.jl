@@ -36,7 +36,7 @@ end # MultiABM
 allabms(model::AbstractMABM)::Vector{AbstractABM} = error("should be implemented")
 
 # an implementation: find out all fields of type AbstractABM and extract allagents 
-allagents(model::AbstractMABM)::Vector{AbstractAgent} = error("should be implemented") 
+allagents(model::AbstractMABM) = error("should be implemented") 
 
 function verify_agentsjl(model::AbstractMABM) 
     for abm in allabms(model) 

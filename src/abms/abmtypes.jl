@@ -31,7 +31,7 @@ mutable struct ABMPDV{A <: AbstractAgent, P, D, V} <: AbstractABM
     data       :: D            
     variables  :: V               
 
-    ABMPDV{A,P,D,V}(agents::Vector{A},pars::P,da::D,vars::V)  where {A,P,D,V}  = 
+    ABMPDV{A,P,D,V}(agents,pars,da,vars)  where {A,P,D,V}  = 
         new{A,P,D,V}(agents,pars,da,vars) 
 
 end # AgentBasedModel  
