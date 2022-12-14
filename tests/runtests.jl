@@ -21,7 +21,7 @@ using MultiAgents: step!, errorstep, dummystep, run!
 using MultiAgents: currstep, stepnumber, dt, starttime, finishtime, verbose, yearly 
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim, 
                     FixedStepSim, FixedStepSimP,
-                    ABMSimulation
+                    ABMSimulator
 using MultiAgents: init_parameters!               
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
@@ -251,13 +251,13 @@ include("./datatypes.jl")
     end
 
 
-    incomeChange!(person::Person,pop,::ABMSimulation) =  
+    incomeChange!(person::Person,pop,::ABMSimulator) =  
         person.income += ( rand() - 0.5 ) * 2 * pop.parameters.changeModifier * person.income
     
-    age_step!(person::Person,pop::PopulationType,simulator::ABMSimulation) = 
+    age_step!(person::Person,pop::PopulationType,simulator::ABMSimulator) = 
         person.age += dt(simulator)
 
-    function incomeAvg!(pop::PopulationType,simulator::ABMSimulation) 
+    function incomeAvg!(pop::PopulationType,simulator::ABMSimulator) 
         ret = 0
         for person in allagents(pop)
             ret += person.income 
@@ -267,7 +267,7 @@ include("./datatypes.jl")
         nothing 
     end 
 
-    @testset verbose=true "Simulating an ABM with an ABM Simulation type" begin 
+    @testset verbose=true "Simulating an ABM with an ABM Simulator type" begin 
 
         struct IncomePars
             changeModifier::Float64
@@ -281,11 +281,11 @@ include("./datatypes.jl")
         createPopulation!(popWincome)
 
         @test_throws Exception  abmsim = 
-                ABMSimulation( dt=1//12,
+                ABMSimulator( dt=1//12,
                                 starttime=1980, finishtime=1990,
                                 verbose=false, yearly=true) 
 
-        abmsim = ABMSimulation( dt=1//12,
+        abmsim = ABMSimulator( dt=1//12,
                                 starttime=1980, finishtime=1990,
                                 verbose=false, yearly=true, 
                                 setupEnabled = false) 
@@ -422,7 +422,7 @@ include("./datatypes.jl")
                 example::AbstractExample = DefaultExample()) = 
                     person.income += ( rand() + 1 ) * 1000
     
-    function buyStocks!(demography::Demography,sim::ABMSimulation,
+    function buyStocks!(demography::Demography,sim::ABMSimulator,
                         example::AbstractExample=DefaultExample()) 
         
         for person in allagents(demography) 
@@ -447,12 +447,12 @@ include("./datatypes.jl")
         demography = Demography()  
 
         @test_throws ErrorException  abmsim = 
-                ABMSimulation( dt=1//12,
+                ABMSimulator( dt=1//12,
                                 starttime=1980, 
                                 finishtime=1980+10,
                                 verbose=false, yearly=true) 
 
-        abmsim = ABMSimulation( dt=1//12, starttime=1980, 
+        abmsim = ABMSimulator( dt=1//12, starttime=1980, 
                                             finishtime=1980+10,
                                             verbose=false, yearly=true,
                                             setupEnabled = false) 
@@ -492,7 +492,7 @@ include("./datatypes.jl")
 
     struct TestExample <: AbstractExample end 
 
-    function buyStocks!(demography::Demography,sim::ABMSimulation,example::TestExample) 
+    function buyStocks!(demography::Demography,sim::ABMSimulator,example::TestExample) 
         
         if stepnumber(sim) % 24 != 0 return nothing end 
 
@@ -518,7 +518,7 @@ include("./datatypes.jl")
         demography = Demography()  
 
 
-        abmsim = ABMSimulation( dt=1//12, starttime=1980, 
+        abmsim = ABMSimulator( dt=1//12, starttime=1980, 
                                             finishtime=1980+10,
                                             verbose=false, yearly=true,
                                             setupEnabled = false) 

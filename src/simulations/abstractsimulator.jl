@@ -1,5 +1,5 @@
 """
-Main specification of a Simulation type. 
+Main specification of a Simulator type. 
 """
 
 using Mixers 
@@ -13,16 +13,16 @@ export dt, starttime, finishtime, seed, verbose, yearly
 export stepnumber, currstep
 export verify_majl
 
-export AbstractSimulation, AbsFixedStepSim, FixedStepSim, FixedStepSimP,
+export AbstractSimulator, AbsFixedStepSim, FixedStepSim, FixedStepSimP,
         DefaultFixedStepSim
 export init_parameters!
 
-abstract type AbstractSimulation end 
+abstract type AbstractSimulator end 
 
-starttime(sim::AbstractSimulation)  = starttime(sim.parameters)
-finishtime(sim::AbstractSimulation) = finishtime(sim.parameters)
-seed(sim::AbstractSimulation)       = seed(sim.parameters) 
-verbose(sim::AbstractSimulation)    = verbose(sim.parameters) 
+starttime(sim::AbstractSimulator)  = starttime(sim.parameters)
+finishtime(sim::AbstractSimulator) = finishtime(sim.parameters)
+seed(sim::AbstractSimulator)       = seed(sim.parameters) 
+verbose(sim::AbstractSimulator)    = verbose(sim.parameters) 
 
 @mix @with_kw struct BasicPars 
     seed :: Int       = 0
@@ -60,7 +60,7 @@ function _init_parameters!(sim, starttime, finishtime, seed=0, verbose=false)
 end 
 
 "Initialize default properties"
-init_parameters!(sim::AbstractSimulation;
+init_parameters!(sim::AbstractSimulator;
                             starttime, 
                             finishtime,
                             seed=0, 
@@ -68,7 +68,7 @@ init_parameters!(sim::AbstractSimulation;
     _init_parameters(sim,starttime,finishtime,seed,verbose)
 
 
-abstract type AbsFixedStepSim <: AbstractSimulation end
+abstract type AbsFixedStepSim <: AbstractSimulator end
 
 dt(sim::AbsFixedStepSim)            = dt(sim.parameters)
 yearly(sim::AbsFixedStepSim)        = yearly(sim.parameters)
