@@ -10,7 +10,10 @@ AbstractAgent could be replaced by using Agents.jl in case Agents.jl will turn
 to be directly usable
 """
 
-export AbstractAgent, AbstractXAgent
+using Agents 
+
+#export AbstractAgent
+export AbstractXAgent
 export verify_agentsjl, getIDCOUNTER, finalize, resetIDCOUNTER
 
 "The ID assigned to an agent for every new agent"
@@ -22,8 +25,8 @@ getIDCOUNTER() = global IDCOUNTER = IDCOUNTER + 1
 "reset counter to 0"
 resetIDCOUNTER() = global IDCOUNTER = 0
                                                  
-"Supertype of any Agent type"
-abstract type AbstractAgent end        # to be replaceable by > using Agents.jl 
+#"Supertype of any Agent type"
+#abstract type AbstractAgent end        # to be replaceable by > using Agents.jl 
   
 "Verify the requirements of abstract agent type"
 verify_agentsjl(a::AbstractAgent) = verify_agentsjl(typeof(a))  
