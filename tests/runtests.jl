@@ -101,7 +101,7 @@ include("./datatypes.jl")
 
     end 
 
-    #= 
+
     @testset verbose=true "pre-defined stepping functions of ABMs" begin
 
         population = PopulationType{Nothing,Nothing,PopVars}(PopVars(1980 // 1))
@@ -553,7 +553,6 @@ include("./datatypes.jl")
                 starttime(abmsim)+10 
         @test stepnumber(abmsim) == 120 
     end 
-    =#
 
 end  # testset MultiAgents components 
 
