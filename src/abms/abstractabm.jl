@@ -6,12 +6,13 @@ Specification of an abstract ABM type as a supertype for all
 
 using  MultiAgents.Util: remove_first!, remove_first_opt!
 import Random.seed!
+import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!
 
 export AbstractABM, AbstractXSpace
 export allagents, nagents
 export add_agent!, move_agent!,
-        kill_agent!, kill_agent_opt!,
-        kill_agent_at!, kill_agent_at_opt!
+    kill_agent!, kill_agent_opt!,
+    kill_agent_at!, kill_agent_at_opt!
 export verify_majl
 
 "Distinguished space types from Agents.jl (subject to removal if useless)"
@@ -20,6 +21,15 @@ XSpaceTypes = Union{Nothing,AbstractXSpace}
 
 "Abstract ABM resembles the ABM concept from Agents.jl"
 abstract type AbstractABM end
+
+# Potential extensions of some agents.jl functions
+
+random_position(::AbstractABM) = error("random_position not implemented")
+nearby_ids(::AbstractXSpace,::AbstractABM,r=1) = error("nearby_ids not implemented")
+add_agent_to_space!(::AbstractXAgent,::AbstractABM) =
+    error("add_agent_to_space! not implemented")
+remove_agent_from_space!(::AbstractXAgent,::AbstractABM) =
+    error("add_agent_to_space! not implemented")
 
 "An AbstractABM subtype to have a list of agents"
 allagents(model::AbstractABM) = model.agentsList
