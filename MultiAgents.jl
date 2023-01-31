@@ -2,7 +2,7 @@ module MultiAgents
 
     export init_majl, MAVERSION
 
-    const MAVERSION = v"0.4"
+    const MAVERSION = v"0.4.1" # Integrations of basic Agents.jl types
 
     include("src/Util.jl")
 
@@ -14,7 +14,7 @@ module MultiAgents
 
     """
     Generic interface specifying main functions for
-    executing an ABM / MABM simulation. 
+    executing an ABM / MABM simulation.
     """
 
     include("src/simulations/abstractsimulator.jl")
@@ -23,8 +23,8 @@ module MultiAgents
 
     function init_majl()
         resetIDCOUNTER()
-        nothing 
+        nothing
     end
 
 
-end 
+end
