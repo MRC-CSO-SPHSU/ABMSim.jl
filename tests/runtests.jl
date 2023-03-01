@@ -10,18 +10,15 @@ julia> include("RunTests.jl")
 
 using Test
 
-# agents
+using Random: seed!
 
-using MultiAgents: init_majl, MAVERSION,
-                    verify_majl, verify_agentsjl
+using MultiAgents: init_majl, MAVERSION, verify_majl, verify_agentsjl
 using MultiAgents: kill_agent!, kill_agent_opt!,
-                    kill_agent_at!, kill_agent_at_opt!,
-                    seed!, nagents
+                    kill_agent_at!, kill_agent_at_opt!, nagents
 using MultiAgents: step!, errorstep, dummystep, run!
 using MultiAgents: currstep, stepnumber, dt, starttime, finishtime, verbose, yearly
 using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim,
-                    FixedStepSim, FixedStepSimP,
-                    ABMSimulator
+                    FixedStepSim, FixedStepSimP, ABMSimulator
 using MultiAgents: init_parameters!
 using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 

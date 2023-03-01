@@ -4,15 +4,13 @@ Specification of an abstract ABM type as a supertype for all
     from Agents.jl
 """
 
+import Random: seed!
 using  MultiAgents.Util: remove_first!, remove_first_opt!
-import Random.seed!
-import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!
+import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!,
+    allagents, nagents, add_agent!, move_agent!, kill_agent!
 
 export AbstractABM
-export allagents, nagents
-export add_agent!, move_agent!,
-    kill_agent!, kill_agent_opt!,
-    kill_agent_at!, kill_agent_at_opt!
+export kill_agent_opt!, kill_agent_at!, kill_agent_at_opt!
 export verify_majl
 
 "Abstract ABM resembles the ABM concept from Agents.jl"
@@ -79,7 +77,7 @@ Functionalities for agents within an ABM
 
 "random seed of the model (Agents.jl)"
 seed!(model::AbstractABM,seed) =
-    seed == 0 ? seed!(floor(Int,time())) : seed!(seed)
+    seed == 0 ? Random.seed!(floor(Int,time())) : seed!(seed)
 
 "number of agents"
 nagents(model::AbstractABM) = length(allagents(model))
