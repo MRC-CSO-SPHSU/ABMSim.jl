@@ -8,13 +8,12 @@ using Random
 
 using MultiAgents.Util: date2years_months, AbstractExample, DefaultExample
 
-export dummystep, errorstep
+import Agents: dummystep
 export dt, starttime, finishtime, seed, verbose, yearly
-export stepnumber, currstep
+export errorstep, stepnumber, currstep
 export verify_majl
 
-export AbstractSimulator, AbsFixedStepSim, FixedStepSim, FixedStepSimP,
-        DefaultFixedStepSim
+export AbstractSimulator, AbsFixedStepSim, FixedStepSim, FixedStepSimP, DefaultFixedStepSim
 export init_parameters!
 
 abstract type AbstractSimulator end
