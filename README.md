@@ -20,3 +20,4 @@ Julia package for modeling and simulation of Multi-agent based models
    - V0.3.1   (7-11-2022)  : User-arbitrary types for simulation parameters 
    
  - **V0.4**   (14-12-2022) : optimized implementation of kill_agent!, simple and parameterized ABM type, blueStyle coding guidelines, constistent naming conventions of source files, unit tests increased to 101
+ - **V0.5**   (5-3-2023)   : Importing common functions from Agents.jl + bluestyle coding recommended editor settings 
