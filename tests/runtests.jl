@@ -24,7 +24,7 @@ using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 init_majl()
-@assert MAVERSION == v"0.4.1"
+@assert MAVERSION == v"0.5"
 
 include("./datatypes.jl")
 

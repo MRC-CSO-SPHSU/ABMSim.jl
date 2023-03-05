@@ -2,7 +2,7 @@ module MultiAgents
 
     export init_majl, MAVERSION
 
-    const MAVERSION = v"0.4.1" # Integrations of basic Agents.jl types
+    const MAVERSION = v"0.5" # Integrations of basic Agents.jl types
 
     include("src/Util.jl")
 
