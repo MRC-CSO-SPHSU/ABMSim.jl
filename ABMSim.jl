@@ -1,8 +1,8 @@
-module MultiAgents
+module ABMSim
 
-    export init_majl, MAVERSION
+    export init_majl, ABMSIMVERSION
 
-    const MAVERSION = v"0.5.1" # minor issue
+    const ABMSIMVERSION = v"0.5.1" # minor issue
 
     include("src/Util.jl")
 

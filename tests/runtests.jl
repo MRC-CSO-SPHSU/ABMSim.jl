@@ -12,7 +12,7 @@ using Test
 
 using Random: seed!
 
-using MultiAgents: init_majl, MAVERSION, verify_majl, verify_agentsjl
+using MultiAgents: init_majl, ABMSIMVERSION, verify_majl, verify_agentsjl
 using MultiAgents: kill_agent!, kill_agent_opt!,
                     kill_agent_at!, kill_agent_at_opt!, nagents
 using MultiAgents: step!, errorstep, dummystep, run!
@@ -24,7 +24,7 @@ using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 init_majl()
-@assert MAVERSION == v"0.5.1"
+@assert ABMSIMVERSION == v"0.5.1"
 
 include("./datatypes.jl")
 
