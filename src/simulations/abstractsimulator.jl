@@ -6,7 +6,7 @@ using Mixers
 using Parameters
 using Random
 
-using MultiAgents.Util: date2years_months, AbstractExample, DefaultExample
+using ABMSim.Util: date2years_months, AbstractExample, DefaultExample
 
 import Agents: dummystep
 export dt, starttime, finishtime, seed, verbose, yearly

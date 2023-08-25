@@ -5,7 +5,7 @@ Specification of an abstract ABM type as a supertype for all
 """
 
 import Random: seed!
-using  MultiAgents.Util: remove_first!, remove_first_opt!
+using  ABMSim.Util: remove_first!, remove_first_opt!
 import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!,
     allagents, nagents, add_agent!, move_agent!, kill_agent!
 

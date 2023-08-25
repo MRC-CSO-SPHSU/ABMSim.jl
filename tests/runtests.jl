@@ -4,7 +4,7 @@ Run this script from shell as
 
 or within REPL
 
-julia> push!(LOAD_PATH,"/path/to/MultiAgents.jl")
+julia> push!(LOAD_PATH,"/path/to/ABMSim.jl")
 julia> include("RunTests.jl")
 """
 
@@ -12,15 +12,15 @@ using Test
 
 using Random: seed!
 
-using MultiAgents: init_majl, ABMSIMVERSION, verify_majl, verify_agentsjl
-using MultiAgents: kill_agent!, kill_agent_opt!,
+using ABMSim: init_majl, ABMSIMVERSION, verify_majl, verify_agentsjl
+using ABMSim: kill_agent!, kill_agent_opt!,
                     kill_agent_at!, kill_agent_at_opt!, nagents
-using MultiAgents: step!, errorstep, dummystep, run!
-using MultiAgents: currstep, stepnumber, dt, starttime, finishtime, verbose, yearly
-using MultiAgents: DefaultFixedStepSim, AbsFixedStepSim,
+using ABMSim: step!, errorstep, dummystep, run!
+using ABMSim: currstep, stepnumber, dt, starttime, finishtime, verbose, yearly
+using ABMSim: DefaultFixedStepSim, AbsFixedStepSim,
                     FixedStepSim, FixedStepSimP, ABMSimulator
-using MultiAgents: init_parameters!
-using MultiAgents: attach_agent_step!, attach_post_model_step!, verboseStep
+using ABMSim: init_parameters!
+using ABMSim: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 init_majl()
@@ -28,7 +28,7 @@ init_majl()
 
 include("./datatypes.jl")
 
-@testset "MultiAgents Components Testing" begin
+@testset "ABMSim Components Testing" begin
 
 
     @testset verbose=true "AbstractAgent verification" begin
@@ -551,6 +551,6 @@ include("./datatypes.jl")
         @test stepnumber(abmsim) == 120
     end
 
-end  # testset MultiAgents components
+end  # testset ABMSim components
 
 nothing
