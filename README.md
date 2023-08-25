@@ -10,6 +10,12 @@ ABMSim.jl: An agent-based model simultor
 
 This package provides simple ABM model and simulation types, currently tuned for large-scale demographic ABMs, cf.\ [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl). It strives to make use of the state-of-the-art Agents.jl package. 
 
+### Author(s) 
+[Atiyah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/)
+
+### Contributor(s)  
+Atiyah Elsheikh (V0-V0.6)  
+
 ### Releases
 
 - **V0.1** (28-06-2022) : Basic abstract functionalities of Multiagents models (Agents, ABMs, MultiABMs, ABM Simulation, MABM Simulations)
