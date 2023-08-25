@@ -33,9 +33,9 @@ Atiyah Elsheikh (V0-V0.6)
  - **V0.4**   (14-12-2022) : optimized implementation of kill_agent!, simple and parameterized ABM type, blueStyle coding guidelines, constistent naming conventions of source files, unit tests increased to 101
  - **V0.5**   (5-3-2023)   : Importing common functions from Agents.jl + bluestyle coding recommended editor settings 
 
-   - V0.5.1   (19-5)       : Minor issues , missing export statmenet
+   - V0.5.1   (19-5-23)    : Minor issues , missing export statmenet
       
- - **V0.6**   (25-8)       : Renaming to ABMSim.jl
+ - **V0.6**   (25-8-23)    : Renaming to ABMSim.jl
 
 ### License
 MIT License
