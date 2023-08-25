@@ -35,4 +35,9 @@ Atiyah Elsheikh (V0-V0.6)
 
    - V0.5.1   (19-5)       : Minor issues , missing export statmenet
       
- - **V0.6**   (25-8)       : Renaming to ABMSim.jl  
+ - **V0.6**   (25-8)       : Renaming to ABMSim.jl
+
+### License
+MIT License
+
+Copyright (c) 2023 Atiyah Elsheikh, MRC/CSO Social & Public Health Sciences Unit, School of Health and Wellbeing, University of Glasgow, Cf. [License](https://github.com/MRC-CSO-SPHSU/MiniDemographicABM.jl/blob/master/LICENSE) for further information
