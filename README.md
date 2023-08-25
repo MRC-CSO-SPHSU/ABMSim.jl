@@ -4,7 +4,7 @@
 
 ### Title 
 
-ABMSim.jl: An agent-based model simultor 
+ABMSim.jl: An agent-based model simulator 
 
 ### Descritpion 
 
