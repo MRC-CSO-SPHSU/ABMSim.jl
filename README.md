@@ -1,6 +1,7 @@
 # ABMSim.jl
 
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8284008.svg)](https://doi.org/10.5281/zenodo.8284009)
 
 ### Title 
 
