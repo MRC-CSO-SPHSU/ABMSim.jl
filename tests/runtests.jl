@@ -12,7 +12,7 @@ using Test
 
 using Random: seed!
 
-using ABMSim: init_majl, ABMSIMVERSION, verify_majl, verify_agentsjl
+using ABMSim: init_abmsim, ABMSIMVERSION, verify_majl, verify_agentsjl
 using ABMSim: kill_agent!, kill_agent_opt!,
                     kill_agent_at!, kill_agent_at_opt!, nagents
 using ABMSim: step!, errorstep, dummystep, run!
@@ -23,8 +23,8 @@ using ABMSim: init_parameters!
 using ABMSim: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
-init_majl()
-@assert ABMSIMVERSION == v"0.5.1"
+init_abmsim()
+@assert ABMSIMVERSION == v"0.6"
 
 include("./datatypes.jl")
 

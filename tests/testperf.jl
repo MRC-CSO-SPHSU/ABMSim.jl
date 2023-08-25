@@ -1,6 +1,6 @@
 using ABMSim: kill_agent!, kill_agent_opt!,
                     kill_agent_at!, kill_agent_at_opt!,
-                    init_majl
+                    init_abmsim
 
 include("./datatypes.jl")
 
@@ -43,7 +43,7 @@ function killatAndAddAgent!(pop,M,killatfunc)
     nothing
 end
 
-init_majl()
+init_abmsim()
 
 # slowest version takes 1 sec. in my machine
 N = 12_500

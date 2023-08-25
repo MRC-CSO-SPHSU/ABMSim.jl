@@ -1,6 +1,6 @@
 module ABMSim
 
-    export init_majl, ABMSIMVERSION
+    export init_abmsim, ABMSIMVERSION
 
     const ABMSIMVERSION = v"0.6" # Renaming MultiAgents.jl to ABMSim.jl
 
@@ -21,7 +21,7 @@ module ABMSim
     include("src/simulations/abstractabmsimulator.jl")
     include("src/simulations/abmsimulator.jl")
 
-    function init_majl()
+    function init_abmsim()
         resetIDCOUNTER()
         nothing
     end
