@@ -69,7 +69,7 @@ Execution of unit tests within REPL:
 
 Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator (V0.6.1). Zenodo. https://doi.org/10.5281/zenodo.8284009
 
-##### bibtex 
+#### bibtex 
 
 @software{atiyah_elsheikh_2023_8284009,
   author       = {Atiyah Elsheikh},
