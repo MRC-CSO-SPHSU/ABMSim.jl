@@ -41,3 +41,22 @@ Atiyah Elsheikh (V0-V0.6)
 MIT License
 
 Copyright (c) 2023 Atiyah Elsheikh, MRC/CSO Social & Public Health Sciences Unit, School of Health and Wellbeing, University of Glasgow, Cf. [License](https://github.com/MRC-CSO-SPHSU/MiniDemographicABM.jl/blob/master/LICENSE) for further information
+
+### Platform 
+This code was developed and experimented on 
+- Ubuntu 22.04.2 LTS
+- VSCode V1.71.2
+- Julia language V1.9.1
+- Agents.jl V5.14.0
+
+### Exeution 
+
+This is a library with no internal examples. However, cf. [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl) as an example. 
+
+Execution of unit tests within REPL: 
+
+<code>  
+  > push!(LOAD_PATH,"/home/atiyah/work/julia/ABMSim.jl/")
+  > include("tests/runtests")
+</code> 
+
