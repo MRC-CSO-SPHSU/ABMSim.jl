@@ -1,6 +1,6 @@
-using MultiAgents.Util: date2years_months, AbstractExample, DefaultExample
-using MultiAgents: AbstractXAgent, ABMPDV, SimpleABM, AbstractMABM
-using MultiAgents: getIDCOUNTER, add_agent!
+using ABMSim.Util: date2years_months, AbstractExample, DefaultExample
+using ABMSim: AbstractXAgent, ABMPDV, SimpleABM, AbstractMABM
+using ABMSim: getIDCOUNTER, add_agent!
 using Random: seed!
 
 mutable struct Person <: AbstractXAgent
@@ -96,5 +96,5 @@ end
 
 mainabm(demography::Demography) = demography.pop
 
-import MultiAgents: allagents
+import ABMSim: allagents
 allagents(demography::Demography) = allagents(mainabm(demography))

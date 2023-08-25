@@ -1,9 +1,20 @@
-# MultiAgents.jl
+# ABMSim.jl
 
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
-Julia package for modeling and simulation of Multi-agent based models
+### Title 
 
+ABMSim.jl: An agent-based model simultor 
+
+### Descritpion 
+
+This package provides simple ABM model and simulation types, currently tuned for large-scale demographic ABMs, cf.\ [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl). It strives to make use of the state-of-the-art Agents.jl package. 
+
+### Author(s) 
+[Atiyah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/)
+
+### Contributor(s)  
+Atiyah Elsheikh (V0-V0.6)  
 
 ### Releases
 
@@ -21,3 +32,37 @@ Julia package for modeling and simulation of Multi-agent based models
    
  - **V0.4**   (14-12-2022) : optimized implementation of kill_agent!, simple and parameterized ABM type, blueStyle coding guidelines, constistent naming conventions of source files, unit tests increased to 101
  - **V0.5**   (5-3-2023)   : Importing common functions from Agents.jl + bluestyle coding recommended editor settings 
+
+   - V0.5.1   (19-5-23)    : Minor issues , missing export statmenet
+      
+ - **V0.6**   (25-8-23)    : Renaming to ABMSim.jl
+
+### License
+MIT License
+
+Copyright (c) 2023 Atiyah Elsheikh, MRC/CSO Social & Public Health Sciences Unit, School of Health and Wellbeing, University of Glasgow, Cf. [License](https://github.com/MRC-CSO-SPHSU/MiniDemographicABM.jl/blob/master/LICENSE) for further information
+
+### Platform 
+This code was developed and experimented on 
+- Ubuntu 22.04.2 LTS
+- VSCode V1.71.2
+- Julia language V1.9.1
+- Agents.jl V5.14.0
+
+### Exeution 
+
+This is a library with no internal examples. However, cf. [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl) as an example. 
+
+Execution of unit tests within REPL: 
+
+<code>  
+  > push!(LOAD_PATH,"/home/atiyah/work/julia/ABMSim.jl/")
+  > include("tests/runtests")
+</code> 
+
+### References
+
+[1] George Datseris, Ali R. Vahdati, Timothy C. DuBois: Agents.jl: a performant and feature-full agent-based modeling software of minimal code complexity. SIMULATION. 2022. doi:10.1177/00375497211068820
+
+### Fundings 
+[Dr. Atyiah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/), by the time of publishing Version 1.0 of this software, is a Research Software Engineer at MRC/CSO Social & Public Health Sciences Unit, School of Health and Wellbeing, University of Glasgow. He is in the Complexity in Health programme. He is supported  by the Medical Research Council (MC_UU_00022/1) and the Scottish Government Chief Scientist Office (SPHSU16). 

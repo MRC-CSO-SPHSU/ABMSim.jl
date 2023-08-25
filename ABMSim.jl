@@ -1,8 +1,8 @@
-module MultiAgents
+module ABMSim
 
-    export init_majl, MAVERSION
+    export init_abmsim, ABMSIMVERSION
 
-    const MAVERSION = v"0.5" # Integrations of basic Agents.jl types
+    const ABMSIMVERSION = v"0.6" # Renaming MultiAgents.jl to ABMSim.jl
 
     include("src/Util.jl")
 
@@ -21,7 +21,7 @@ module MultiAgents
     include("src/simulations/abstractabmsimulator.jl")
     include("src/simulations/abmsimulator.jl")
 
-    function init_majl()
+    function init_abmsim()
         resetIDCOUNTER()
         nothing
     end
