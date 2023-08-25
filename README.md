@@ -2,8 +2,13 @@
 
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
-Julia package for modeling and simulation of Multi-agent based models
+### Title 
 
+ABMSim.jl: An agent-based model simultor 
+
+### Descritpion 
+
+This package provides simple ABM model and simulation types, currently tuned for large-scale demographic ABMs, cf.\ [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl). It strives to make use of the state-of-the-art Agents.jl package. 
 
 ### Releases
 
