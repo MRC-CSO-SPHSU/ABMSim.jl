@@ -3,7 +3,7 @@
     A concept for ABM simulation
 """
 
-using  MultiAgents.Util: AbstractExample, DummyExample
+using  ABMSim.Util: AbstractExample, DummyExample
 
 import Agents: step!, run!
 
