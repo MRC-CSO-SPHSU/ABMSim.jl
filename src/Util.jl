@@ -13,6 +13,8 @@ module Util
     "Default example type"
     struct DefaultExample <: AbstractExample end 
 
+    # Acknowledgment: Dr. Martin Hinsch for the following algorithm
+
     "remove first occurance of e in list"
     function remove_first!(list, e)
         e ∉ list ? throw(ArgumentError("element $(e) not in $(list)")) : nothing 
