@@ -82,10 +82,10 @@ Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator (V0.6.1). Zen
   year         = 2023,
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.8284008},
-  url          = {https://doi.org/10.5281/zenodo.8284008}
+  url          = {https://doi.org/10.5281/zenodo.8284008 }
 }
 
-Version 0.6.1 
+Version 0.6.1: 
 
 @software{atiyah_elsheikh_2023_8284009,
   author       = {Atiyah Elsheikh},
