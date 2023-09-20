@@ -17,6 +17,8 @@ struct SimpleABMS{A <: AbstractAgent, S <: SpaceType} <: AbstractABM
     space::S
     SimpleABMS{A}() where A = new{A,Nothing}(A[])
     SimpleABMS{A}(agents) where A = new{A,Nothing}(agents)
+    SimpleABMS{A,S}(agents,s) where {A,S} = new{A,S}(agents,s)
+    SimpleABMS{A,S}(s::S) where {A,S} = new{A,S}(A[],s)
 end
 
 const SimpleABM{A}  = SimpleABMS{A}
