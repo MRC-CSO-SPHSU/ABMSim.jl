@@ -3,17 +3,18 @@
     similar to Agents.jl, but with extension.
 """
 
-export ABMPV, SimpleABM
+export ABMPV, SimpleABM, SimpleABMS
 
+const SpaceType = Union{Agents.AbstractSpace,Nothing}
 
 """
     SimpleABMS{AgentType,SpaceType}
 
  Simple ABM type with only agents as fields
 """
-struct SimpleABMS{A <: AbstractAgent, SpaceType} <: AbstractABM
+struct SimpleABMS{A <: AbstractAgent, S <: SpaceType} <: AbstractABM
     agentsList::Vector{A}
-    space::SpaceType
+    space::S
     SimpleABMS{A}() where A = new{A,Nothing}(A[])
     SimpleABMS{A}(agents) where A = new{A,Nothing}(agents)
 end
