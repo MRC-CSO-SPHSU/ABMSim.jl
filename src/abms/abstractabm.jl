@@ -7,7 +7,7 @@ Specification of an abstract ABM type as a supertype for all
 import Random: seed!
 using  ABMSim.Util: remove_first!, remove_first_opt!
 import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!,
-    allagents, nagents, add_agent!, move_agent!, kill_agent!
+    allagents, nagents, add_agent!, move_agent!, kill_agent!, nextid
 
 export AbstractABM
 export kill_agent_opt!, kill_agent_at!, kill_agent_at_opt!, add_agent!
@@ -81,6 +81,9 @@ seed!(model::AbstractABM,seed) =
 
 "number of agents"
 nagents(model::AbstractABM) = length(allagents(model))
+
+"next agent id"
+nextid(model::AbstractABM) = getIDCOUNTER()
 
 #=
 Couple of other useful functions may include:
