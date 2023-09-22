@@ -7,7 +7,7 @@ Specification of an abstract ABM type as a supertype for all
 import Random: seed!
 using  ABMSim.Util: remove_first!, remove_first_opt!
 import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!,
-    allagents, nagents, add_agent!, move_agent!, kill_agent!, nextid
+    allagents, nagents, add_agent!, add_agent_pos!, move_agent!, kill_agent!, nextid
 
 export AbstractABM
 export kill_agent_opt!, kill_agent_at!, kill_agent_at_opt!, add_agent!
@@ -20,10 +20,6 @@ abstract type AbstractABM end
 
 random_position(::AbstractABM) = error("random_position not implemented")
 nearby_ids(::Agents.AbstractSpace,::AbstractABM,r=1) = error("nearby_ids not implemented")
-add_agent_to_space!(::AbstractXAgent,::AbstractABM) =
-    error("add_agent_to_space! not implemented")
-remove_agent_from_space!(::AbstractXAgent,::AbstractABM) =
-    error("add_agent_to_space! not implemented")
 
 "An AbstractABM subtype to have a list of agents"
 allagents(model::AbstractABM) = model.agentsList
@@ -105,6 +101,11 @@ add_agent!(agent,model::AbstractABM) = push!(allagents(model),agent)
 
 "symmetry"
 add_agent!(model::AbstractABM,agent) = add_agent!(agent,model)
+
+function add_agent_pos!(agent,model::AbstractABM)
+    push!(allagents(model),agent)
+    add_agent_to_space!(agent,model)
+end
 
 #=
 "add agent to the model"
