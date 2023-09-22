@@ -41,7 +41,7 @@ mutable struct ABMPDVS{A <: AbstractAgent, P, D, V, S <: SpaceType} <: AbstractA
     ABMPDVS{A,P,D,V,S}(agents,pars,da,vars,sp)  where {A,P,D,V,S}  =
         new{A,P,D,V,Nothing}(agents,pars,da,vars,sp)
     ABMPDVS{A,P,D,V,S}(pars::P,da::D,sp::S) where {A,P,D,V,S} =
-        new{A,P,D,Nothing,S}(A[],pars,da,sp)
+        new{A,P,D,Nothing,S}(A[],pars,da,nothing,sp)
 
 end # AgentBasedModel
 
