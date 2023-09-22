@@ -29,20 +29,29 @@ const SimpleABM{A}  = SimpleABMS{A}
 Agent based model specification for social simulations
     with data, parameters and variable fields
 """
-mutable struct ABMPDV{A <: AbstractAgent, P, D, V} <: AbstractABM
+mutable struct ABMPDVS{A <: AbstractAgent, P, D, V, S <: SpaceType} <: AbstractABM
     agentsList::Vector{A}
+    parameters:: P             # model parameters ideally as a struct data type
+    data      :: D
+    variables :: V
+    space     :: S
 
-    parameters :: P             # model parameters ideally as a struct data type
-    data       :: D
-    variables  :: V
-
-    ABMPDV{A,P,D,V}(agents,pars,da,vars)  where {A,P,D,V}  =
-        new{A,P,D,V}(agents,pars,da,vars)
+    ABMPDVS{A,P,D,V}(agents,pars,da,vars)  where {A,P,D,V}  =
+        new{A,P,D,V,Nothing}(agents,pars,da,vars,nothing)
+    ABMPDVS{A,P,D,V,S}(agents,pars,da,vars,sp)  where {A,P,D,V,S}  =
+        new{A,P,D,V,Nothing}(agents,pars,da,vars,sp)
+    ABMPDVS{A,P,D,V,S}(pars::P,da::D,sp::S) where {A,P,D,V,S} =
+        new{A,P,D,Nothing,S}(A[],pars,da,sp)
 
 end # AgentBasedModel
 
 
 # special cases
+
+const ABMPDV{A,P,D,V} = ABMPDVS{A,P,D,V,Nothing}
+
+ABMPDV{A,P,D,V}(a,p,d,v) where {A,P,D,V} =
+    ABMPDVS{A,P,D,V,Nothing}(a,p,d,v,nothing)
 
 ABMPDV{A,Nothing,Nothing,Nothing}() where A =
     ABMPDV{A,Nothing,Nothing,Nothing}(A[],nothing,nothing,nothing)
