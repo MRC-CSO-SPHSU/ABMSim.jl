@@ -4,7 +4,6 @@
 """
 
 export ABMPV, SimpleABM, SimpleABMS
-export parameters, data
 
 const SpaceType = Union{Agents.AbstractSpace,Nothing}
 
@@ -64,7 +63,3 @@ ABMPDV{A,Nothing,Nothing,V}(v::V) where {A,V} =
 
 ABMPDV{A,P,Nothing,V}(p::P,v::V) where {A,P,V} =
     ABMPDV{A,P,Nothing,V}(A[],p,nothing,v)
-
-# accessory functions
-parameters(model::ABMPDVS) = model.parameters
-data(model::ABMPDVS) = model.data
