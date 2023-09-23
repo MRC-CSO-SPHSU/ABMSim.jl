@@ -7,7 +7,7 @@ Specification of an abstract ABM type as a supertype for all
 import Random: seed!
 using  ABMSim.Util: remove_first!, remove_first_opt!
 import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!,
-    allagents, nagents, add_agent!, add_agent_pos!, move_agent!, kill_agent!, nextid
+    allagents, nagents, add_agent!, add_agent_pos!, kill_agent!, nextid
 
 export AbstractABM
 export kill_agent_opt!, kill_agent_at!, kill_agent_at_opt!, add_agent!
@@ -113,9 +113,6 @@ function add_agent!(agent,pos,model::AgentBasedModel)
     nothing
 end
 =#
-
-"to a given position (Agents.jl)"
-move_agent!(agent,pos,model::AbstractABM) =  error("not implemented")
 
 "remove an agent"
 kill_agent!(agent,model::AbstractABM) = remove_first!(allagents(model),agent)
