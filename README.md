@@ -9,7 +9,7 @@ ABMSim.jl: An agent-based model simulator
 
 ### Descritpion 
 
-This package provides simple ABM model and simulation types, currently tuned for large-scale demographic ABMs, cf.\ [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl). It strives to make use of the state-of-the-art Agents.jl package. 
+This simulation tool provides simple ABM model and simulation types, currently tuned for large-scale demographic ABMs, cf.\ [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl). It strives to make use of the state-of-the-art Agents.jl package. 
 
 ### Author(s) 
 [Atiyah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/)
@@ -52,7 +52,7 @@ This code was developed and experimented on
 
 ### Exeution 
 
-This is a library with no internal examples. However, cf. [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl) as an example. 
+This is a simulation tool with no internal examples. However, cf. [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl) as an example. 
 
 Execution of unit tests within REPL: 
 
@@ -67,9 +67,25 @@ Execution of unit tests within REPL:
 
 ### Cite as 
 
+Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator. Zenodo. https://doi.org/10.5281/zenodo.8284008
+
+current version (V0.6.1): 
+
 Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator (V0.6.1). Zenodo. https://doi.org/10.5281/zenodo.8284009
 
 #### bibtex 
+
+@software{atiyah_elsheikh_2023_8284009,
+  author       = {Atiyah Elsheikh},
+  title        = {ABMSim.jl: An agent-based model simulator},
+  month        = aug,
+  year         = 2023,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.8284008},
+  url          = {https://doi.org/10.5281/zenodo.8284008 }
+}
+
+Version 0.6.1: 
 
 @software{atiyah_elsheikh_2023_8284009,
   author       = {Atiyah Elsheikh},
@@ -82,7 +98,11 @@ Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator (V0.6.1). Zen
   url          = {https://doi.org/10.5281/zenodo.8284009}
 }
 
+### Acknowledgments 
+
+For the purpose of open access, the author(s) has applied a Creative Commons Attribution (CC BY) licence to any Author Accepted Manuscript version arising from this submission.
+
 ### Fundings 
-[Dr. Atyiah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/), by the time of publishing Version 1.0 of this software, is a Research Software Engineer at MRC/CSO Social & Public Health Sciences Unit, School of Health and Wellbeing, University of Glasgow. He is in the Complexity in Health programme. He is supported  by the Medical Research Council (MC_UU_00022/1) and the Scottish Government Chief Scientist Office (SPHSU16). 
+[Dr. Atyiah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/), by the time of publishing Version 0.6 of this software, is a Research Software Engineer at MRC/CSO Social & Public Health Sciences Unit, School of Health and Wellbeing, University of Glasgow. He is in the Complexity in Health programme. He is supported  by the Medical Research Council (MC_UU_00022/1) and the Scottish Government Chief Scientist Office (SPHSU16). 
 
 
