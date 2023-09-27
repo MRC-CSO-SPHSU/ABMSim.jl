@@ -70,8 +70,7 @@ abstract type AbsFixedStepSim <: AbstractSimulator end
 dt(sim::AbsFixedStepSim)            = dt(sim.parameters)
 yearly(sim::AbsFixedStepSim)        = yearly(sim.parameters)
 stepnumber(sim::AbsFixedStepSim)    = sim.stepnumber
-currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) +
-                                        Rational{Int}(starttime(sim))
+currstep(sim::AbsFixedStepSim)      = stepnumber(sim) * dt(sim) + starttime(sim)
 function verify_majl(sim::AbsFixedStepSim)
     try
         dt(sim)
@@ -291,10 +290,10 @@ end
 
 function run!(model::AbstractABM,
                 agent_step!,
-                simulator::AbsFixedStepSim = DefaultFixedStepSim(),
+                sim::AbsFixedStepSim = DefaultFixedStepSim(),
                 example::AbstractExample = DefaultExample())
     nsteps = prerun!(model,sim)
-    step!(model,agent_step!,simulator,example,n=nsteps)
+    step!(model,agent_step!,sim,example,n=nsteps)
     nothing
 end
 
