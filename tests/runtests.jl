@@ -24,7 +24,7 @@ using ABMSim: attach_agent_step!, attach_post_model_step!, verboseStep
 
 
 init_abmsim()
-@assert ABMSIMVERSION == v"0.6.1"
+@assert ABMSIMVERSION == v"0.7"
 
 include("./datatypes.jl")
 
