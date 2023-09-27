@@ -9,7 +9,7 @@ ABMSim.jl: An agent-based model simulator
 
 ### Descritpion 
 
-This simulation tool provides some ABM model and simulation types for seperate specification of ABM models and their simulation, currently tuned for large-scale demographic ABMs, cf.\ [UKDemographicABM.jl package](https://github.com/MRC-CSO-SPHSU/UKDemographicABM.jl). It strives to exploit the state-of-the-art Agents.jl package.  
+This simulation tool provides some ABM model and simulation types for seperate specification of ABM models and their simulation, currently tuned for large-scale demographic ABMs, cf.\ [UKDemographicABM.jl package](https://github.com/MRC-CSO-SPHSU/UKDemographicABM.jl). It strives to exploit the state-of-the-art Agents.jl package. A lighter example can be consulted via the model [MiniDemographicABM.jl](https://github.com/MRC-CSO-SPHSU/MiniDemographicABM.jl) 
 
 ### Author(s) 
 [Atiyah Elsheikh](https://www.gla.ac.uk/schools/healthwellbeing/staff/atiyahelsheikh/)
