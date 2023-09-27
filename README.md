@@ -37,6 +37,7 @@ Atiyah Elsheikh (V0-V0.6)
    - V0.5.1   (19-5-23)    : Minor issues , missing export statmenet
       
  - **V0.6**   (25-8-23)    : Renaming to ABMSim.jl
+ - **V0.7**   (27-9-23)    : Integration of space concept into existing ABMType, minor Agents.jl-based enhancements  
 
 ### License
 MIT License
