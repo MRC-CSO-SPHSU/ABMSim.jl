@@ -2,7 +2,7 @@ module ABMSim
 
     export init_abmsim, ABMSIMVERSION
 
-    const ABMSIMVERSION = v"0.6" # Renaming MultiAgents.jl to ABMSim.jl
+    const ABMSIMVERSION = v"0.6.1" # Integrate Space Concept into ABM types
 
     include("src/Util.jl")
 
