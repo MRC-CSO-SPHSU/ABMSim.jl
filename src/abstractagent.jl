@@ -10,7 +10,7 @@ AbstractAgent could be replaced by using Agents.jl in case Agents.jl will turn
 to be directly usable
 """
 
-using Agents
+using Agents: AbstractAgent
 
 export AbstractXAgent
 export verify_agentsjl, getIDCOUNTER, finalize, resetIDCOUNTER
