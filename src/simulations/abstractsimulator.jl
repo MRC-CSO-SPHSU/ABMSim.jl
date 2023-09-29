@@ -8,7 +8,7 @@ using Random
 
 using ABMSim.Util: date2years_months, AbstractExample, DefaultExample
 
-import Agents: dummystep
+import Agents: dummystep, step!, run!
 export dt, starttime, finishtime, seed, verbose, yearly
 export errorstep, stepnumber, currstep
 export verify_majl
