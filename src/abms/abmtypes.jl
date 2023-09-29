@@ -4,8 +4,9 @@
 """
 
 export ABMPV, SimpleABM, SimpleABMS
+using Agents: AbstractSpace
 
-const SpaceType = Union{Agents.AbstractSpace,Nothing}
+const SpaceType = Union{AbstractSpace,Nothing}
 
 """
     SimpleABMS{AgentType,SpaceType}
