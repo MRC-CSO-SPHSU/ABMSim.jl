@@ -18,7 +18,6 @@ export verify_agentsjl, getIDCOUNTER, finalize, resetIDCOUNTER
 "The ID assigned to an agent for every new agent"
 global IDCOUNTER = 0::Int              # This is differnt than agents.jl
 
-# TODO nextid(model)
 "A counter for assigning unique ID for each agent"
 getIDCOUNTER() = global IDCOUNTER = IDCOUNTER + 1
 
