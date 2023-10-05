@@ -2,7 +2,7 @@ module ABMSim
 
     export init_abmsim, ABMSIMVERSION
 
-    const ABMSIMVERSION = v"0.7" # Integrate Space Concept into ABM types
+    const ABMSIMVERSION = v"0.7.1" # get rid of warnings
 
     include("src/Util.jl")
 

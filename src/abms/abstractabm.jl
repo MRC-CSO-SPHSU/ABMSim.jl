@@ -6,11 +6,12 @@ Specification of an abstract ABM type as a supertype for all
 
 import Random: seed!
 using  ABMSim.Util: remove_first!, remove_first_opt!
+import Agents
 import Agents: random_position, nearby_ids, add_agent_to_space!, remove_agent_from_space!,
     allagents, nagents, add_agent!, add_agent_pos!, kill_agent!, nextid
 
 export AbstractABM
-export kill_agent_opt!, kill_agent_at!, kill_agent_at_opt!, add_agent!
+export kill_agent_opt!, kill_agent_at!, kill_agent_at_opt!
 export verify_majl
 
 "Abstract ABM resembles the ABM concept from Agents.jl"

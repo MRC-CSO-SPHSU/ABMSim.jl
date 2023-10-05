@@ -5,8 +5,6 @@
 
 using  ABMSim.Util: AbstractExample, DummyExample
 
-import Agents: step!, run!
-
 export AbstractABMSimulator
 export attach_agent_step!, attach_pre_model_step!, attach_post_model_step!
 export setup!
