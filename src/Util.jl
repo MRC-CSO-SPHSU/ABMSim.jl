@@ -1,7 +1,6 @@
 module Util
 
     export AbstractExample, DummyExample, DefaultExample
-
     export remove_first!, remove_first_opt!, date2years_months, getproperty
 
     "A super type for all simulation examples"
@@ -39,8 +38,5 @@ module Util
         months = trunc(Int, numerator(date) % denominator(date) * 12 / denominator(date) )
         return (years , months)
     end
-
-    "Make dictionaries look like struct for symbols keys"
-    Base.getproperty(d::Dict, s::Symbol) = s ∈ fieldnames(Dict) ? getfield(d, s) : getindex(d, s)
 
 end # module Util

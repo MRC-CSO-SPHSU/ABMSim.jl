@@ -2,7 +2,7 @@ module ABMSim
 
     export init_abmsim, ABMSIMVERSION
 
-    const ABMSIMVERSION = v"0.7.1" # get rid of warnings
+    const ABMSIMVERSION = v"0.7.2" # no performance drop when using Agents and ABMSim
 
     include("src/Util.jl")
 
