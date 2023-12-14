@@ -57,7 +57,7 @@ This code was developed and experimented on
 
 ### Exeution 
 
-This is a simulation tool with no internal examples. However, cf. [LPM.jl package](https://github.com/MRC-CSO-SPHSU/LPM.jl) as an example. 
+This is a simulation tool with no internal examples. However, cf. [MiniDemographicABM.jl](https://github.com/MRC-CSO-SPHSU/MiniDemographicABM.jl) & [UKDemographicABM.jl package](https://github.com/MRC-CSO-SPHSU/UKDemographicABM.jl) as examples. 
 
 Execution of unit tests within REPL: 
 
