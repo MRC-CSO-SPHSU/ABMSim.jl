@@ -1,7 +1,7 @@
 # ABMSim.jl
 
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8284008.svg)](https://doi.org/10.5281/zenodo.8284008)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8430963.svg)](https://doi.org/10.5281/zenodo.8430963)
 
 ### Title 
 
@@ -40,7 +40,8 @@ Atiyah Elsheikh (V0-V0.7)
  - **V0.7**   (27-9-23)    : Integration of space concept into existing ABMType, minor Agents.jl-based enhancements
  
    - V0.7.1   (5-10-23)    : removing unnecessary import statements
-   - V0.7.2   (11-10-23)   : removing cause for performance drop of Agents.jl when using ABMSim 
+   - V0.7.2   (11-10-23)   : removing cause for performance drop of Agents.jl when using ABMSim
+   - V0.7.3   (14-12-23)   : Fix DOI and citation
 
 ### License
 MIT License
@@ -61,7 +62,7 @@ This is a simulation tool with no internal examples. However, cf. [LPM.jl packag
 Execution of unit tests within REPL: 
 
 <code>  
-  > push!(LOAD_PATH,"/home/atiyah/work/julia/ABMSim.jl/")
+  > push!(LOAD_PATH,"/path/to/ABMSim.jl/")
   > include("tests/runtests")
 </code> 
 
@@ -71,11 +72,7 @@ Execution of unit tests within REPL:
 
 ### Cite as 
 
-Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator. Zenodo. https://doi.org/10.5281/zenodo.8284008
-
-current version (V0.6.1): 
-
-Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator (V0.6.1). Zenodo. https://doi.org/10.5281/zenodo.8284009
+Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator. Zenodo.[https://doi.org/10.5281/zenodo.8430963](https://doi.org/10.5281/zenodo.8430963)
 
 #### bibtex 
 
@@ -85,21 +82,8 @@ Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator (V0.6.1). Zen
   month        = aug,
   year         = 2023,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.8284008},
-  url          = {https://doi.org/10.5281/zenodo.8284008 }
-}
-
-Version 0.6.1: 
-
-@software{atiyah_elsheikh_2023_8284009,
-  author       = {Atiyah Elsheikh},
-  title        = {ABMSim.jl: An agent-based model simulator},
-  month        = aug,
-  year         = 2023,
-  publisher    = {Zenodo},
-  version      = {V0.6.1},
-  doi          = {10.5281/zenodo.8284009},
-  url          = {https://doi.org/10.5281/zenodo.8284009}
+  doi          = {10.5281/zenodo.8430963},
+  url          = {https://doi.org/10.5281/zenodo.8430963}
 }
 
 ### Acknowledgments 
