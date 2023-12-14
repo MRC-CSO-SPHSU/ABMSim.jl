@@ -1,7 +1,7 @@
 # ABMSim.jl
 
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8430963.svg)](https://doi.org/10.5281/zenodo.8430963)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8284008.svg)](https://doi.org/10.5281/zenodo.8284008)
 
 ### Title 
 
@@ -72,7 +72,7 @@ Execution of unit tests within REPL:
 
 ### Cite as 
 
-Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator. Zenodo.[https://doi.org/10.5281/zenodo.8430963](https://doi.org/10.5281/zenodo.8430963)
+Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator. Zenodo.[https://doi.org/10.5281/zenodo.8284008](https://doi.org/10.5281/zenodo.8284008)
 
 #### bibtex 
 
@@ -82,8 +82,8 @@ Atiyah Elsheikh. (2023). ABMSim.jl: An agent-based model simulator. Zenodo.[http
   month        = aug,
   year         = 2023,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.8430963},
-  url          = {https://doi.org/10.5281/zenodo.8430963}
+  doi          = {10.5281/zenodo.8284008},
+  url          = {https://doi.org/10.5281/zenodo.8284008}
 }
 
 ### Acknowledgments 
